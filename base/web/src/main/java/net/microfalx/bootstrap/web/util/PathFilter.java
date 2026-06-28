@@ -171,6 +171,9 @@ public class PathFilter {
         registerExclusionPattern("**/*.cfm");
         registerExclusionPattern("**/.env*");
         registerExclusionPattern("**/.git");
+        registerExclusionPattern("**/wp-content*");
+        registerExclusionPattern("**/wp-admin*");
+        registerExclusionPattern("**/wp-includes*");
     }
 
     private static String getRootPath(String path, int parts) {
