@@ -2,6 +2,12 @@
 
 This file provides guidance to any AI agents when working with code in this repository.
 
+## Instruction precedence
+
+When guidance conflicts, resolve in this order: explicit user/task instructions in the current conversation >
+this file (`AGENTS.md`) > module-level `README.md` > existing conventions in the file(s) being touched. `CLAUDE.md`
+is a pointer to this file and carries no additional rules.
+
 ## Project overview
 
 Bootstrap provides building blocks for Spring Boot projects — opinionated custom services/components on top of
@@ -27,6 +33,10 @@ The root `pom.xml` depends on several sibling `net.microfalx` artifacts (`lang`,
 - `mvn clean install -DskipTests` — compile/install the whole reactor without tests.
 - `mvn clean test` — compile and run tests.
 - `mvn -pl <module> -am test` — run tests for a single module and its dependencies.
+- Minimum verification before considering a change complete:
+  - Docs-only change: no build required.
+  - Single-module code change: `mvn -pl <module> -am test`.
+  - Change touching shared/core modules or public APIs: `mvn clean test` for the whole reactor.
 - Run the demo app: `mvn spring-boot:run` from the `demo` module, or run the `DemoApplication` main class. Serves at http://localhost:8080.
 - The demo app requires a local MySQL database (see `README.md` for the exact `CREATE USER`/`CREATE DATABASE` SQL) and uses in-house migrations (see Database access section below).
 
@@ -45,13 +55,15 @@ Standard Java/Spring Boot guidelines apply unless overridden below.
 - Use descriptive names for classes, methods, and variables.
 - Avoid `var` keyword, prefer explicit types.
 - Preference for immutability:
-    - Avoid mutations of objects, especially when using for-each loops or Stream API using `forEach()`.
+    - Avoid mutating shared/external state inside `for-each` loops or `Stream.forEach()`; prefer `map`/`filter`/`collect`
+      or building a new collection instead of accumulating into a pre-existing mutable variable.
     - Avoid magic numbers and strings; use constants instead.
     - Check emptiness and nullness before operations on collections and strings using `net.microfalx.lang.StringUtils` and `net.microfalx.lang.ObjectUtils` (project-internal utilities, not Apache Commons or Guava).
     - Avoid methods using `throws` clause; prefer unchecked exceptions for domain/service APIs; keep checked exceptions when required by external API/contracts.
 - Comments are required on complex or non-obvious business logic, APIs (contracts). Ensure they are clear and concise.
 - Use `@Override` annotation when overriding methods.
-- Wrap multiple conditions in a boolean variable for better readability.
+- Wrap 2 or more boolean conditions (e.g., in an `if`) into a named boolean variable describing the intent,
+  instead of an inline compound expression.
 - Prefer early returns.
 - Avoid `else` statements when not necessary and try early returns.
 
@@ -70,14 +82,16 @@ Standard Java/Spring Boot guidelines apply unless overridden below.
 - `@RestController`: for REST API controllers.
 - `@Component`: for generic Spring components.
 - `@Configuration`: for Spring configuration classes.
-- `@Autowired`: constructor injection only, use `@RequiredArgsConstructor`, no field injection except tests.
+- `@Autowired`: constructor injection only, use `@RequiredArgsConstructor` with `final` fields, no field injection except tests.
 - `@ConfigurationProperties`: for binding related properties, avoid multiple `@Value` annotations. From more than 2 properties, consider using this annotation.
 - `@Transactional`: preferably only `@Service` classes should be annotated with `@Transactional`, when needed and exceptions must be justified and properly handled.
 - Circular dependencies should be avoided. Avoid `@Order` annotation for dependency resolution.
 
 ## Mappers
 
-Not yet decided by the team — choose MapStruct or strictly static mappers. Don't assume either convention.
+Not yet decided by the team — choose MapStruct or strictly static mappers. Don't assume either convention;
+check the module being edited for an existing mapper pattern and follow it. If the module has no precedent,
+prefer strictly static mappers (no extra build-time annotation processing) and flag the choice for review.
 
 ## Exception handling
 
