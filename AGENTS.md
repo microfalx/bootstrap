@@ -4,29 +4,35 @@ This file provides guidance to any AI agents when working with code in this repo
 
 ## Instruction precedence
 
-When guidance conflicts, resolve in this order: explicit user/task instructions in the current conversation >
-this file (`AGENTS.md`) > module-level `README.md` > existing conventions in the file(s) being touched. `CLAUDE.md`
-is a pointer to this file and carries no additional rules.
+When guidance conflicts, use this order:
+1. Explicit user or task instructions in the current conversation.
+2. This file (`AGENTS.md`).
+3. The module-level `README.md`.
+4. Existing conventions in the files being changed.
+
+`CLAUDE.md` points to this file and adds no rules.
 
 ## Project overview
 
-Bootstrap provides building blocks for Spring Boot projects — opinionated custom services/components on top of
-Spring Boot. Java 17, Spring Boot 3.5.x, built with Apache Maven as a multi-module reactor (root `pom.xml` is
-`packaging=pom`). No CI pipeline exists; build/test verification is manual.
+Bootstrap provides opinionated services and components for Spring Boot projects. It uses Java 17, Spring Boot 3.5.x,
+and Apache Maven. The root `pom.xml` is a multi-module reactor with `packaging=pom`. There is no CI pipeline; verify
+builds and tests manually.
 
 Module groups (each has its own `pom.xml`):
-- `base`: app, cli, configuration, core, feature, logger, metrics, registry, resource, security, store, support, test, trace, web
+- `base`: app, cli, configuration, core, feature, logger, metrics, registry, resource, security, store, support, test,
+  trace, web
 - `data`: broker, content (Apache Tika), dataset, dsv, jdbc (incl. modular DB migration), model, test
-- `extension`: dos, help, mail, rest-api, rest-api-client (Retrofit), search, security, support, system, template (Thymeleaf), test, web
+- `extension`: dos, help, mail, rest-api, rest-api-client (Retrofit), search, security, support, system,
+  template (Thymeleaf), test, web
 - `cloud`: google
 - `ai`: api, core, lucene, provider (github, hugging-face, llama, ollama, openai), web
 - `serenity`: browser testing on Serenity BDD
 - `demo`: runnable Spring Boot demo app (`DemoApplication`)
 - `bom`: Bill of Materials for dependency management
 
-The root `pom.xml` depends on several sibling `net.microfalx` artifacts (`lang`, `resource`, `metrics`,
-`tracing`, `jvm`, `jdbcpool`, `threadpool`, `webjar`) from separate repos, plus an external parent POM
-`net.microfalx:pom`. A centralized BOM is used for dependency management, provided by `net.microfalx:bom` dependency in the root `pom.xml`.
+The root `pom.xml` depends on sibling `net.microfalx` artifacts (`lang`, `resource`, `metrics`, `tracing`, `jvm`,
+`jdbcpool`, `threadpool`, and `webjar`) from separate repositories. It also uses the external parent POM
+`net.microfalx:pom` and the centralized `net.microfalx:bom` for dependency management.
 
 ## Build & test
 
@@ -37,14 +43,16 @@ The root `pom.xml` depends on several sibling `net.microfalx` artifacts (`lang`,
   - Docs-only change: no build required.
   - Single-module code change: `mvn -pl <module> -am test`.
   - Change touching shared/core modules or public APIs: `mvn clean test` for the whole reactor.
-- Run the demo app: `mvn spring-boot:run` from the `demo` module, or run the `DemoApplication` main class. Serves at http://localhost:8080.
-- The demo app requires a local MySQL database (see `README.md` for the exact `CREATE USER`/`CREATE DATABASE` SQL) and uses in-house migrations (see Database access section below).
+- Run the demo app with `mvn spring-boot:run` from the `demo` module, or run the `DemoApplication` main class.
+  It serves at http://localhost:8080.
+- The demo app requires a local MySQL database. See `README.md` for setup commands. It uses in-house migrations; see
+  the Database access section below.
 
 ## Version control
 
 - No enforced commit message or branch naming convention today. Write clear, descriptive commit messages
   summarizing the change and its intent.
-- No CI pipeline; run the verification level from "Build & test" above before considering a change complete.
+- Run the verification level from "Build & test" above before considering a change complete.
 
 ## Code formatting
 
@@ -75,7 +83,7 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 ## Lombok annotations
 
 - Use `@RequiredArgsConstructor` for dependency injection via constructor.
-- Use `@Slf4j` for logging (logger field name is `LOGGER`, configured in `lombok.config`; accessors chain via `lombok.accessors.chain=true`).
+- Use `@Slf4j` for logging. The repository configures the logger field as `LOGGER`; see `lombok.config`.
 - Use `@Builder(setterPrefix = "with")` for complex object creation.
 - Avoid `@Data` annotation; prefer `@Getter`, `@Setter`, and `@ToString` for granular control.
 
@@ -87,24 +95,26 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 - `@RestController`: for REST API controllers.
 - `@Component`: for generic Spring components.
 - `@Configuration`: for Spring configuration classes.
-- `@Autowired`: constructor injection only, use `@RequiredArgsConstructor` with `final` fields, no field injection except tests.
-- `@ConfigurationProperties`: for binding related properties, avoid multiple `@Value` annotations. From more than 2 properties, consider using this annotation.
+- Use constructor injection with `@RequiredArgsConstructor` and `final` fields. Do not use field injection except in
+  tests.
+- Use `@ConfigurationProperties` to bind related properties. Prefer it over multiple `@Value` annotations for 3 or more
+  properties.
 - `@Transactional`: only on `@Service` classes. Justify each use and ensure rollback covers the failure cases.
 - Avoid circular dependencies. Do not use `@Order` to mask a circular-dependency problem. `@Order` is fine for
   legitimate bean-ordering (e.g., `@Order(Ordered.HIGHEST_PRECEDENCE)` on infrastructure services).
 
 ## Module dependencies
 
-- Modules must not introduce circular dependencies across the reactor. A module may only depend on modules
-  earlier in its group or on other groups it legitimately builds on (see root `pom.xml` module order).
+- Modules must not introduce circular dependencies across the reactor. A module may depend only on modules earlier in
+  its group or on groups it legitimately builds on. Check the root `pom.xml` module order.
 - When adding a new dependency between modules, prefer depending on an API/interface module over an
   implementation module, if one exists.
 
 ## Mappers
 
-TODO (team decision pending): choose MapStruct or strictly static mappers project-wide. Until decided, check the
-module being edited for an existing mapper pattern and follow it. If the module has no precedent, prefer strictly
-static mappers (no extra build-time annotation processing) and flag the choice for review.
+TODO (team decision pending): choose MapStruct or strictly static mappers project-wide. Until then, check the module
+being edited for an existing mapper pattern and follow it. If there is no precedent, prefer static mappers without
+extra build-time annotation processing. Mention this choice in the change review.
 
 ## Exception handling
 
@@ -126,7 +136,7 @@ Frameworks:
 
 - JUnit 5 for unit and integration tests.
 - Plain JUnit assertions for simple cases; AssertJ (`org.assertj.core.api.Assertions`) for complex assertions.
-- Plain Mockito for simple unit tests (utils/domain classes) that don't need a Spring Boot context.
+- Plain Mockito for utility and domain unit tests that do not need a Spring Boot context.
 - `ServiceUnitTestCase` for service/component unit tests (see `net.microfalx.bootstrap.test.ServiceUnitTestCase`).
   It supports the Mockito extension and custom answers via classes annotated with `@AnswerFor`
   (see `net.microfalx.bootstrap.test.annotation.AnswerFor`).
@@ -152,7 +162,7 @@ Conventions:
 
 ## Database access
 
-- Use Spring Data JPA as much as possible: JPA -> JPQL -> small native JPA queries -> `QueryProvider`.
+- Prefer Spring Data JPA in this order: repository methods, JPQL `@Query`, short native `@Query`, then `QueryProvider`.
   - CRUD/simple filter -> JPA repository methods.
   - Medium-complexity portable query -> JPQL `@Query`.
   - DB-specific but short -> native `@Query`.
