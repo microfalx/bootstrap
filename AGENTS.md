@@ -20,7 +20,7 @@ Module groups (each has its own `pom.xml`):
 
 The root `pom.xml` depends on several sibling `net.microfalx` artifacts (`lang`, `resource`, `metrics`,
 `tracing`, `jvm`, `jdbcpool`, `threadpool`, `webjar`) from separate repos, plus an external parent POM
-`net.microfalx:pom`. A centralized BOB is used for dependency management, provided by `net.microfalx:bom` dependency in the root `pom.xml`.
+`net.microfalx:pom`. A centralized BOM is used for dependency management, provided by `net.microfalx:bom` dependency in the root `pom.xml`.
 
 ## Build & test
 
@@ -45,14 +45,12 @@ Standard Java/Spring Boot guidelines apply unless overridden below.
 - Use descriptive names for classes, methods, and variables.
 - Avoid `var` keyword, prefer explicit types.
 - Preference for immutability:
-    - Avoid mutations of objects, specially when using for-each loops or Stream API using `forEach()`.
+    - Avoid mutations of objects, especially when using for-each loops or Stream API using `forEach()`.
     - Avoid magic numbers and strings; use constants instead.
     - Check emptiness and nullness before operations on collections and strings using `net.microfalx.lang.StringUtils` and `net.microfalx.lang.ObjectUtils` (project-internal utilities, not Apache Commons or Guava).
-    - Avoid methods using `throws` clause; prefer unchecked exceptions.
-- Avoid comments, unless the business logic is complex and not self-explanatory. If comments are necessary, ensure they are clear and concise.
-- Comments could be applied for: cron expressions, regex patterns, TODOs, or given/when/then separation in tests.
+    - Avoid methods using `throws` clause; prefer unchecked exceptions for domain/service APIs; keep checked exceptions when required by external API/contracts.
+- Comments are required on complex or non-obvious business logic, APIs (contracts). Ensure they are clear and concise.
 - Use `@Override` annotation when overriding methods.
-- Avoid `Objects.isNull()` and `Objects.nonNull()` for one or two variables; prefer direct null checks for better performance.
 - Wrap multiple conditions in a boolean variable for better readability.
 - Prefer early returns.
 - Avoid `else` statements when not necessary and try early returns.
@@ -72,9 +70,9 @@ Standard Java/Spring Boot guidelines apply unless overridden below.
 - `@RestController`: for REST API controllers.
 - `@Component`: for generic Spring components.
 - `@Configuration`: for Spring configuration classes.
-- `@Autowired`: prefer constructor injection for production code, or when the number of injected fields is small; field injection only for tests.
+- `@Autowired`: constructor injection only, use `@RequiredArgsConstructor`, no field injection except tests.
 - `@ConfigurationProperties`: for binding related properties, avoid multiple `@Value` annotations. From more than 2 properties, consider using this annotation.
-- `@Transactional`: only `@Service` classes should be annotated with `@Transactional`, when needed.
+- `@Transactional`: preferably only `@Service` classes should be annotated with `@Transactional`, when needed and exceptions must be justified and properly handled.
 - Circular dependencies should be avoided. Avoid `@Order` annotation for dependency resolution.
 
 ## Mappers
@@ -91,9 +89,10 @@ Not yet decided by the team — choose MapStruct or strictly static mappers. Don
 ## Testing
 
 - Use JUnit 5 for unit and integration testing.
-- Use Mockito for mocking dependencies in unit tests.
+- Use plain JUnit assertions for simple cases and prefer AssertJ for more complex assertions (see `org.assertj.core.api.Assertions`).
 - Do not add a `test` prefix to test method names; instead, use descriptive names that indicate the behavior being tested.
-- Use `ServiceUnitTestCase` for unit tests (see `net.microfalx.bootstrap.test.ServiceUnitTestCase`); it is supported by Mockito extension and annotation with custom answers provided by classes annotated with @AnswerFor (see `net.microfalx.bootstrap.test.annotation.AnswerFor`).
+- Use plain Mockito for simple unit test cases (utils/domain classes), where Spring Boot context is not required.
+- Use `ServiceUnitTestCase` for complex (services/components/etc) unit tests (see `net.microfalx.bootstrap.test.ServiceUnitTestCase`); it is supported by Mockito extension and annotation with custom answers provided by classes annotated with @AnswerFor (see `net.microfalx.bootstrap.test.annotation.AnswerFor`).
 - Use `ServiceIntegrationTestCase` for integration tests (see `net.microfalx.bootstrap.test.ServiceIntegrationTestCase`) and it already imports core configurations & services.
 - Use given/when/then structure in test methods for clarity.
 - Method naming should follow camelCase convention for test methods (e.g., `getUserByIdOk`, `getUserByIdNotFound`).
@@ -104,17 +103,19 @@ Not yet decided by the team — choose MapStruct or strictly static mappers. Don
 
 - Use `@Slf4j` annotation from Lombok for logging to avoid boilerplate code with Logger instances.
 - Log at appropriate levels: `DEBUG`, `INFO`, `WARN`, `ERROR`.
-- Include contextual information in logs (e.g., request IDs, user IDs).
+- Include contextual information in logs (e.g., `requestId`, `userId`, `entityId`, `operation`, `outcome`).
 - Avoid logging sensitive information.
 - Use structured logging for better log management.
 - Format log messages with placeholders (e.g., `{}`) instead of string concatenation.
 
 ## Database access
 
-- Use Spring Data JPA for database access as much as possible.
-- For complex queries, use `@Query` annotation with JPQL, or native SQL for simple queries, in repository interfaces.
+- Use Spring Data JPA for database access as much as possible (JPA -> JPQL -> small JPA native queries ->  `QueryProvider`).
+  - CRUD/simple filter -> JPA repository methods
+  - Medium complexity portable query -> JPQL @Query
+  - DB-specific but short -> native @Query
+  - Large (upserting, multiple joins, etc.)/dynamic/vendor-specific/ -> QueryProvider + SQL resource file
 - Schema is defined in `resources/sql/TYPE/schema` and data in `resources/sql/TYPE/data`, and are automatically executed at application startup (`TYPE` = `mysql` for MySQL, `TYPE` = `postgres` for Postgres and so on; default target database is mysql).
 - Custom (native) queries are stored in `resources/sql/TYPE/queries` and can be executed using `net.microfalx.bootstrap.jdbc.support.Query` (built on top of Spring Boot `JdbcClient`) and `net.microfalx.bootstrap.jdbc.support.QueryProvider` to create the database-specific queries.
-- For complex queries (upserting, multiple joins, etc.) or in the absence of entities and repositories, always consider using custom native queries stored in `resources/sql/TYPE/queries`.
 - Use transactions for operations that modify the database, and ensure that they are properly rolled back in case of exceptions.
 - Avoid N+1 query problems by using `fetch` joins or `@EntityGraph`.
