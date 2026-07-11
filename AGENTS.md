@@ -89,7 +89,7 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 - `@Configuration`: for Spring configuration classes.
 - `@Autowired`: constructor injection only, use `@RequiredArgsConstructor` with `final` fields, no field injection except tests.
 - `@ConfigurationProperties`: for binding related properties, avoid multiple `@Value` annotations. From more than 2 properties, consider using this annotation.
-- `@Transactional`: only `@Service` classes should use it. Justify any use and handle exceptions properly.
+- `@Transactional`: only on `@Service` classes. Justify each use and ensure rollback covers the failure cases.
 - Avoid circular dependencies. Do not use `@Order` to mask a circular-dependency problem. `@Order` is fine for
   legitimate bean-ordering (e.g., `@Order(Ordered.HIGHEST_PRECEDENCE)` on infrastructure services).
 
