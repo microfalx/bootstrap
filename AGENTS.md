@@ -39,6 +39,7 @@ The root `pom.xml` depends on sibling `net.microfalx` artifacts (`lang`, `resour
 - `mvn clean install -DskipTests` — compile/install the whole reactor without tests.
 - `mvn clean test` — compile and run tests.
 - `mvn -pl <module> -am test` — run tests for a single module and its dependencies.
+- `mvn -pl <module> -Dtest=ClassName#methodName test` — run a single test method.
 - Minimum verification before considering a change complete:
   - Docs-only change: no build required.
   - Single-module code change: `mvn -pl <module> -am test`.
@@ -51,8 +52,7 @@ The root `pom.xml` depends on sibling `net.microfalx` artifacts (`lang`, `resour
 ## Version control
 
 - No enforced commit message or branch naming convention today. Write clear, descriptive commit messages
-  summarizing the change and its intent.
-- Run the verification level from "Build & test" above before considering a change complete.
+  summarizing the change and its intent. See "Build & test" for the required verification level before committing.
 
 ## Code formatting
 
@@ -67,14 +67,16 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 
 - Use UTF-8 encoding.
 - Use descriptive names for classes, methods, and variables.
-- Avoid `var` keyword, prefer explicit types.
-- Prefer immutability. Avoid mutating shared/external state inside `for-each` loops or `Stream.forEach()`.
+- Avoid `var` keyword, prefer explicit types, for consistent, easily-reviewable diffs; unless the line is very long 
+  and the type is obvious from the right-hand side.
+- Prefer immutability. Avoid mutating shared/external state inside `for-each` loops or `Stream.forEach()`/`peek()`.
   Use `map`/`filter`/`collect` or build a new collection instead.
 - Avoid magic numbers and strings; use constants instead.
 - Check emptiness and nullness before operating on collections and strings. Use project-internal
   `net.microfalx.lang.StringUtils` and `net.microfalx.lang.ObjectUtils`, not Apache Commons or Guava.
-- Comment complex or non-obvious business logic and public APIs. Keep comments clear and concise.
-- Add Javadoc on public classes/methods exposed as module APIs (not required for internal/package-private code).
+- Comment complex or non-obvious business logic; keep comments clear and concise. For public classes/methods
+  exposed as module APIs (`public` types outside `internal`/`impl` packages), use Javadoc instead of a plain
+  comment; not required for internal/package-private code.
 - Use `@Override` when overriding methods.
 - Wrap 2 or more boolean conditions (e.g., in an `if`) into a named boolean variable describing the intent,
   instead of an inline compound expression.
@@ -109,6 +111,7 @@ Follow standard Java/Spring Boot conventions except where overridden below.
   its group or on groups it legitimately builds on. Check the root `pom.xml` module order.
 - When adding a new dependency between modules, prefer depending on an API/interface module over an
   implementation module, if one exists.
+- Do not add new dependencies; Provide reasons why new dependencies are needed.
 
 ## Mappers
 
