@@ -19,7 +19,7 @@ class PathFilterTest {
     private HttpServletRequest httpServletRequest;
     private String requestUri = "/";
 
-    private PathFilter filter = new PathFilter(true, true);
+    private final PathFilter filter = new PathFilter(true, true, true);
 
     @BeforeEach
     void setup() {
@@ -47,6 +47,8 @@ class PathFilterTest {
         assertExcluded("/.env.production");
         assertExcluded("/services/.env");
         assertExcluded("/.env.old");
+        assertExcluded("/test.md");
+        assertExcluded("/test.sql");
     }
 
     private void assertExcluded(String path) {
