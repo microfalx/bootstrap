@@ -22,7 +22,7 @@ import java.util.Map;
 public class GlobalExceptionListener implements HandlerExceptionResolver {
 
     private static final Map<Failure.Type, Issue.Severity> FAILURE_SEVERITIES = new HashMap<>();
-    private static final PathFilter DEFAULT_EXCLUSIONS = new PathFilter(true, true);
+    private static final PathFilter DEFAULT_EXCLUSIONS = PathFilter.all();
 
     private static final Metrics FAILURE = Metrics.of("Bootstrap").withGroup("Controller Failures");
     private static final Metrics FAILURE_BY_EXCEPTION = FAILURE.withGroup("Exception");

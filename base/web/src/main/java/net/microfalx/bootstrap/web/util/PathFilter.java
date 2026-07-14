@@ -25,17 +25,22 @@ public class PathFilter {
     private final Set<String> excludedPaths = new CopyOnWriteArraySet<>();
     private final Set<String> excludedPatterns = new CopyOnWriteArraySet<>();
 
+    public static PathFilter all() {
+        return new PathFilter(true, true, true);
+    }
+
     public PathFilter() {
         this(true);
     }
 
     public PathFilter(boolean withDefaults) {
-        this(withDefaults, false);
+        this(withDefaults, false, false);
     }
 
-    public PathFilter(boolean withDefaults, boolean withNonJavaHandler) {
+    public PathFilter(boolean withDefaults, boolean withNonJavaHandler, boolean withConfigs) {
         if (withDefaults) registerDefaultPaths();
         if (withNonJavaHandler) registerDefaultNonJavaPatterns();
+        if (withConfigs) registerConfigPatterns();
     }
 
     public boolean isRoot(HttpServletRequest request) {
@@ -174,6 +179,12 @@ public class PathFilter {
         registerExclusionPattern("**/wp-content*");
         registerExclusionPattern("**/wp-admin*");
         registerExclusionPattern("**/wp-includes*");
+    }
+
+    private void registerConfigPatterns() {
+        registerExclusionPattern("**/*.yml");
+        registerExclusionPattern("**/*.md");
+        registerExclusionPattern("**/*.sql");
     }
 
     private static String getRootPath(String path, int parts) {

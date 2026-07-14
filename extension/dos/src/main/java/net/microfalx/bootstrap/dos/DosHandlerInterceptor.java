@@ -18,7 +18,7 @@ public class DosHandlerInterceptor implements HandlerInterceptor {
     private final static String DOS_VALIDATOR_ATTRIBUTE = "$BOOTSTRAP_DOS_VALIDATOR$";
 
     private final DosService dosService;
-    private final PathFilter pathFilter = new PathFilter(true, true);
+    private final PathFilter pathFilter = PathFilter.all();
 
     public DosHandlerInterceptor(DosService dosService) {
         requireNonNull(dosService);
