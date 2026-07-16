@@ -51,8 +51,10 @@ The root `pom.xml` depends on sibling `net.microfalx` artifacts (`lang`, `resour
 
 ## Version control
 
-- No enforced commit message or branch naming convention today. Write clear, descriptive commit messages
+- No enforced commit message. Write clear, descriptive commit messages
   summarizing the change and its intent. See "Build & test" for the required verification level before committing.
+- Branching follows the MAJOR.MINOR versioning scheme. Use `main` for the latest development version. Use `x.y` 
+  for release branches.
 
 ## Code formatting
 
@@ -81,6 +83,9 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 - Wrap 2 or more boolean conditions (e.g., in an `if`) into a named boolean variable describing the intent,
   instead of an inline compound expression.
 - Prefer early returns; avoid `else` when a return can be used instead.
+- Use immutability objects with builder pattern objects for API domain objects based on 
+  `net.microfalx.lang.IdentityAware.Builder` or one of the subclasses depending on which subclass of 
+  `net.microfalx.lang.IdentityAware` is created. 
 
 ## Lombok annotations
 
@@ -115,9 +120,12 @@ Follow standard Java/Spring Boot conventions except where overridden below.
 
 ## Mappers
 
-TODO (team decision pending): choose MapStruct or strictly static mappers project-wide. Until then, check the module
-being edited for an existing mapper pattern and follow it. If there is no precedent, prefer static mappers without
-extra build-time annotation processing. Mention this choice in the change review.
+ - Use `net.microfalx.bootstrap.model.Mapper` which provides a generic mapping framework for converting between domain 
+   objects and DTOs. It supports mapping between different types, including nested objects and collections.
+ - Use `net.microfalx.bootstrap.model.Mapper.to` to create a new target object and copy properties from the source object.
+ - Use `net.microfalx.bootstrap.model.Mapper.copy` to create copy properties from the source object into an existing target object.
+ - Use `net.microfalx.bootstrap.model.Mapper.builder` to create builder and customize the mapping (when the property 
+   names are not the same) using `ignoreField`, `ignoreAnnotation`, `mapField` in the builder class.
 
 ## Exception handling
 
