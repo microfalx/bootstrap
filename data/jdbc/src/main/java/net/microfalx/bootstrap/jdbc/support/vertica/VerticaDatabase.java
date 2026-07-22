@@ -2,7 +2,7 @@ package net.microfalx.bootstrap.jdbc.support.vertica;
 
 import net.microfalx.bootstrap.core.utils.HostnameUtils;
 import net.microfalx.bootstrap.jdbc.support.*;
-import net.microfalx.bootstrap.metrics.util.SimpleStatisticalSummary;
+import net.microfalx.metrics.statistics.SimpleStatisticalSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;

@@ -32,6 +32,20 @@ public class MetricsService extends ApplicationContextSupport implements Initial
     // Do not remove, tt is wired because resource service setups the JVM paths
     @Autowired(required = false) private ResourceService resourceService;
 
+    private ThreadPool threadPool;
+
+    /**
+     * Returns the thread pool used to collect metrics.
+     *
+     * @return a non-null instance
+     */
+    public ThreadPool getThreadPool() {
+        if (threadPool == null) {
+            threadPool = ThreadPool.builder("Metrics").maximumSize(5).build();
+        }
+        return threadPool;
+    }
+
     /**
      * Returns registered repositories.
      *
@@ -85,7 +99,7 @@ public class MetricsService extends ApplicationContextSupport implements Initial
 
     private void initializeMetricsCollectors() {
         LOGGER.debug("Initialize metrics collectors");
-        ThreadPool threadPool = ThreadPool.builder("Metrics").maximumSize(5).build();
+        ThreadPool threadPool = getThreadPool();
         try {
             VirtualMachineMetrics.get().useDisk("jvm").setExecutor(threadPool).start();
         } catch (Exception e) {

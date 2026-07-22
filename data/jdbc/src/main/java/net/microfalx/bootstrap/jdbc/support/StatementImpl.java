@@ -1,8 +1,8 @@
 package net.microfalx.bootstrap.jdbc.support;
 
-import net.microfalx.bootstrap.metrics.util.SimpleStatisticalSummary;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.metrics.statistics.SimpleStatisticalSummary;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.SetStatement;
