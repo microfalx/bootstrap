@@ -8,17 +8,24 @@ import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
-import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.cache.StandardCacheManager;
+import org.thymeleaf.linkbuilder.StandardLinkBuilder;
+import org.thymeleaf.standard.StandardDialect;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import java.io.IOException;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
+import static net.microfalx.lang.StringUtils.removeStartSlash;
 
 /**
  * A service used to evaluate templates/expressions.
@@ -29,9 +36,10 @@ public class TemplateService implements InitializingBean {
 
     @Autowired private TemplateProperties properties;
     @Autowired private MetadataService metadataService;
-    @Autowired private ResourceService resourceService;
 
     private LoadingCache<String, Template> cache;
+
+    private volatile TemplateEngine templateEngine;
 
     /**
      * Creates a template with an expression.
@@ -65,6 +73,20 @@ public class TemplateService implements InitializingBean {
         } catch (Exception e) {
             throw new TemplateException("Failed to create template from " + resource, e);
         }
+    }
+
+    /**
+     * Creates a template with a resource from <code>classpath://templates/${path}</code>.
+     *
+     * @param type the template type
+     * @param path the path to the template, relative to the classpath
+     * @return a non-null instance
+     */
+    public Template loadTemplate(Template.Type type, String path) {
+        requireNonNull(type);
+        requireNonNull(path);
+        Resource resource = ClassPathResource.file("templates/" + removeStartSlash(path));
+        return getTemplate(type, resource);
     }
 
     /**
@@ -119,6 +141,27 @@ public class TemplateService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         createCache();
         logOptions();
+    }
+
+    TemplateEngine getTemplateEngine() {
+        initEngine();
+        return templateEngine;
+    }
+
+    private synchronized void initEngine() {
+        if (templateEngine != null) return;
+        LOGGER.info("Initializing template engine");
+
+        // init resolver
+        StringTemplateResolver memoryTemplateResolver = new StringTemplateResolver();
+        memoryTemplateResolver.setTemplateMode(TemplateMode.HTML);
+
+        // create engine
+        templateEngine = new TemplateEngine();
+        templateEngine.setDialect(new StandardDialect());
+        templateEngine.setLinkBuilder(new StandardLinkBuilder());
+        templateEngine.setCacheManager(new StandardCacheManager());
+        templateEngine.setTemplateResolver(memoryTemplateResolver);
     }
 
     private void createCache() {
