@@ -7,23 +7,30 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 
 /**
  * Base class for all templates
  */
-public abstract class AbstractTemplate implements Template {
+public abstract class AbstractTemplate implements Template, Cloneable {
 
     private static final Metrics EXPRESSION = TemplateUtils.METRICS.withGroup("Evaluate Expression");
     private static final Metrics RESOURCE = TemplateUtils.METRICS.withGroup("Evaluate Resource");
 
     private final TemplateService templateService;
     private final Resource resource;
+    private Mode mode = Mode.HTML;
 
     public AbstractTemplate(TemplateService templateService, Resource resource) {
         requireNonNull(templateService);
         requireNonNull(resource);
         this.templateService = templateService;
         this.resource = resource;
+    }
+
+    @Override
+    public final Mode getMode() {
+        return mode;
     }
 
     @Override
@@ -56,6 +63,13 @@ public abstract class AbstractTemplate implements Template {
         }
     }
 
+    @Override
+    public final Template withMode(Mode mode) {
+        AbstractTemplate copy = copy();
+        copy.mode = mode;
+        return copy;
+    }
+
     /**
      * Subclasses would implement this method to evaluate expressions.
      *
@@ -74,4 +88,12 @@ public abstract class AbstractTemplate implements Template {
      * @throws Exception if the expression cannot be evaluated
      */
     protected abstract void doEvaluate(TemplateContext context, OutputStream outputStream) throws Exception;
+
+    protected AbstractTemplate copy() {
+        try {
+            return (AbstractTemplate) clone();
+        } catch (CloneNotSupportedException e) {
+            return rethrowExceptionAndReturn(e);
+        }
+    }
 }

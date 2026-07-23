@@ -30,5 +30,7 @@ public abstract class AbstractTemplateTest {
         Reflect.on(metadataService).set("i18nService", i18nService);
         Reflect.on(templateService).set("properties", templateProperties);
         templateService.afterPropertiesSet();
+        metadataService.afterPropertiesSet();
+        templateService.afterPropertiesSet();
     }
 }

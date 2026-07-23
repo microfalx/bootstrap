@@ -33,6 +33,9 @@ public abstract class AbstractTemplateContext<M, F extends Field<M>, ID> impleme
         this.metadata = metadata;
         this.model = model;
         this.attributes = attributes;
+        if (model != null) {
+            set("model", model);
+        }
     }
 
     public Metadata<M, F, ID> getMetadata() {
@@ -106,6 +109,10 @@ public abstract class AbstractTemplateContext<M, F extends Field<M>, ID> impleme
                 .add("attributes=" + attributes)
                 .add("variables=" + variables)
                 .toString();
+    }
+
+    Map<String, Object> getVariables() {
+        return variables;
     }
 
     @SuppressWarnings("unchecked")
