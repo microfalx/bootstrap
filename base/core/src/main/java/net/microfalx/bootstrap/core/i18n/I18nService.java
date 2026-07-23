@@ -84,7 +84,7 @@ public class I18nService implements InitializingBean, I18n {
         requireNonNull(key);
         Locale locale = LocaleContextHolder.getLocale();
         try {
-            return aggregatedMessageSource.getMessage(key, ObjectUtils.EMPTY_ARRAY, locale);
+            return getMessageSource().getMessage(key, ObjectUtils.EMPTY_ARRAY, locale);
         } catch (NoSuchMessageException e) {
             logMissing(key, locale);
             return getSafeText(key, safeText);
@@ -113,7 +113,7 @@ public class I18nService implements InitializingBean, I18n {
     public String getText(String key, boolean safeText, Object... arguments) {
         Locale locale = LocaleContextHolder.getLocale();
         try {
-            return aggregatedMessageSource.getMessage(key, arguments, locale);
+            return getMessageSource().getMessage(key, arguments, locale);
         } catch (NoSuchMessageException e) {
             logMissing(key, locale);
             return getSafeText(key, safeText);
