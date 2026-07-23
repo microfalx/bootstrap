@@ -183,7 +183,7 @@ public class MetadataService implements InitializingBean {
             LOGGER.warn("Validator is not available, disable validation");
             validator = new NoOpValidator();
         } else {
-            if (validator.getClass() != jakartaValidatorFactory.getClass()) {
+            if (jakartaValidatorFactory != null && validator.getClass() != jakartaValidatorFactory.getClass()) {
                 LOGGER.info("Validator is available, implementation: {}, validator: {}, factory: {}",
                         ClassUtils.getName(validator), ClassUtils.getName(jakartaValidator),
                         ClassUtils.getName(jakartaValidatorFactory));
