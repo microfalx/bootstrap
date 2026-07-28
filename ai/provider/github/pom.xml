@@ -24,12 +24,12 @@
 
     <groupId>net.microfalx.bootstrap</groupId>
     <artifactId>bootstrap-ai-provider-github</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.bootstrap</groupId>
         <artifactId>bootstrap-ai-provider</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
 
     <name>Bootstrap :: AI :: Providers :: GitHub</name>
