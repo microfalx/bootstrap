@@ -24,12 +24,12 @@
 
     <groupId>net.microfalx.bootstrap</groupId>
     <artifactId>bootstrap-base-feature</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
 
     <parent>
         <groupId>net.microfalx.bootstrap</groupId>
         <artifactId>bootstrap-base</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
     </parent>
 
     <name>Bootstrap :: Base :: Feature</name>

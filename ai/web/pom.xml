@@ -24,12 +24,12 @@
 
     <groupId>net.microfalx.bootstrap</groupId>
     <artifactId>bootstrap-ai-web</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
 
     <parent>
         <groupId>net.microfalx.bootstrap</groupId>
         <artifactId>bootstrap-ai</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
     </parent>
 
     <name>Bootstrap :: AI :: Web</name>
