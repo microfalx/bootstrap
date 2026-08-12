@@ -36,15 +36,15 @@ public class EnvironmentProvider extends AbstractFragmentProvider {
     }
 
     public double getAverageServerCpu() {
-        return ServerMetrics.get().getAverageCpu();
+        return ServerMetrics.get().getAverageTotalCpuSinceStartup();
     }
 
     public double getAverageServerMemory() {
-        return ServerMetrics.get().getAverageMemory();
+        return ServerMetrics.get().getAverageMemorySinceStartup();
     }
 
     public double getAverageProcessCpu() {
-        return VirtualMachineMetrics.get().getAverageCpu();
+        return VirtualMachineMetrics.get().getAverageCpuSinceStartup();
     }
 
     public double getAverageServerLoad15() {
