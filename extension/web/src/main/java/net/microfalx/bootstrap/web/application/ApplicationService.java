@@ -58,18 +58,18 @@ public final class ApplicationService implements InitializingBean {
 
     private final Application application = new Application();
 
-    static ThreadLocal<Theme> THEME = new ThreadLocal<>();
-    static ThreadLocal<String> APPLICATION = new ThreadLocal<>();
-
     /**
-     * Returns the theme associated with this thread.
+     * Returns the active theme. associated with this thread.
+     * <p>
+     * The active theme is the theme assigned to the current thread, or the default theme
+     * if no theme is assigned.
      *
      * @return a non-null in instance
+     * @see Theme#get()
+     * @see Theme#set(Theme)
      */
     public Theme getCurrentTheme() {
-        Theme theme = THEME.get();
-        if (theme == null) theme = application.getTheme();
-        return theme;
+        return Theme.get().orElse(application.getTheme());
     }
 
     /**

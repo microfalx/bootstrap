@@ -43,7 +43,7 @@ class ApplicationRequestInterceptorTest {
     void before() throws Exception {
         // make sure we have a session
         request.getSession(true);
-        ApplicationService.THEME.remove();
+        Theme.clear();
         defaultTheme = Theme.builder("default").build();
         themes.put("default", defaultTheme);
         Theme customTheme = Theme.builder("light").mode(Theme.Mode.LIGHT).build();
@@ -144,7 +144,7 @@ class ApplicationRequestInterceptorTest {
     }
 
     private static Theme getCurrentTheme() {
-        return ApplicationService.THEME.get();
+        return Theme.get().orElse(null);
     }
 
     @net.microfalx.bootstrap.web.application.annotation.Theme(value = "light", mode = net.microfalx.bootstrap.web.application.annotation.Theme.Mode.DARK)

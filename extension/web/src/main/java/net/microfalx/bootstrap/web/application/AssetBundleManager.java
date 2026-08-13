@@ -186,6 +186,7 @@ final class AssetBundleManager {
         for (AssetBundleOrder expandedBundle : expandedBundles) {
             orderedBundles.add(expandedBundle.assetBundle);
         }
+        if (AssetBundle.get().isPresent()) orderedBundles.add(AssetBundle.get().get());
         return orderedBundles;
     }
 
