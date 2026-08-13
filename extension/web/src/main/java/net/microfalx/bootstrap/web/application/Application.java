@@ -6,8 +6,10 @@ import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Nameable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
+import static java.util.Optional.ofNullable;
 import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 /**
@@ -31,6 +33,46 @@ public final class Application implements Nameable, Descriptable {
 
     TimeZone timeZone;
 
+    private final static ThreadLocal<String> APPLICATION = new ThreadLocal<>();
+
+    /**
+     * Returns the current application identifier.
+     *
+     * @return a non-null instance
+     */
+    public static String current() {
+        return defaultIfEmpty(APPLICATION.get(), "na");
+    }
+
+    /**
+     * Returns the application instance associated with the current thread.
+     *
+     * @return a non-null instance
+     */
+    public static Optional<String> get() {
+        return ofNullable(APPLICATION.get());
+    }
+
+    /**
+     * Changes the application instance associated with the current thread.
+     *
+     * @param id the id, null to remove
+     */
+    public static void set(String id) {
+        if (id != null) {
+            APPLICATION.set(id);
+        } else {
+            clear();
+        }
+    }
+
+    /**
+     * Removes the application instance associated with the current thread.
+     */
+    public static void clear() {
+        APPLICATION.remove();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Application that)) return false;
@@ -43,13 +85,5 @@ public final class Application implements Nameable, Descriptable {
         return Objects.hash(name, owner, url, version);
     }
 
-    /**
-     * Returns the current application identifier.
-     *
-     * @return a non-null instance
-     */
-    public static String current() {
-        return defaultIfEmpty(ApplicationService.APPLICATION.get(), "na");
-    }
 
 }

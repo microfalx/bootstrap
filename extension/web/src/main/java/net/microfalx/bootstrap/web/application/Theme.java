@@ -8,8 +8,10 @@ import net.microfalx.lang.Nameable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.Optional.ofNullable;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
@@ -33,28 +35,37 @@ public final class Theme implements Identifiable<String>, Nameable, Cloneable {
     private Mode mode = Mode.AUTO;
     private final Collection<AssetBundle> assetBundles = new ArrayList<>();
 
+    private static final ThreadLocal<Theme> THEME = new ThreadLocal<>();
+
     /**
-     * Returns the active theme (associated with the current thread).
+     * Returns the theme associated with the current thread.
      *
      * @return a non-null instance
+     * @see ApplicationService#getCurrentTheme()
      */
-    public static Theme get() {
-        Theme theme = ApplicationService.THEME.get();
-        if (theme == null) theme = new Theme(DEFAULT);
-        return theme;
+    public static Optional<Theme> get() {
+        return ofNullable(THEME.get());
     }
 
     /**
-     * Changes the active theme (associated with the current thread).
+     * Changes the theme associated with the current thread.
      *
      * @param theme the theme, null to remove and fall back to default
+     * @see ApplicationService#getCurrentTheme()
      */
     public static void set(Theme theme) {
         if (theme != null) {
-            ApplicationService.THEME.set(theme);
+            THEME.set(theme);
         } else {
-            ApplicationService.THEME.remove();
+            clear();
         }
+    }
+
+    /**
+     * Removes the theme associated with the current thread.
+     */
+    public static void clear() {
+        THEME.remove();
     }
 
     public static Builder builder(String name) {
@@ -66,6 +77,8 @@ public final class Theme implements Identifiable<String>, Nameable, Cloneable {
     }
 
     private Theme(String id, String name) {
+        requireNotEmpty(id);
+        requireNotEmpty(name);
         this.id = id;
         this.name = name;
     }

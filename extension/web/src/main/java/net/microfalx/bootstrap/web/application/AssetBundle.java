@@ -8,6 +8,7 @@ import net.microfalx.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static java.util.Optional.ofNullable;
 import static net.microfalx.bootstrap.web.application.ApplicationUtils.NO_VERSION;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.defaultIfEmpty;
@@ -35,6 +36,51 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
 
     private final Set<String> features = new HashSet<>();
     private final List<Asset> assets = new CopyOnWriteArrayList<>();
+
+    static final ThreadLocal<AssetBundle> ASSET_BUNDLE = new ThreadLocal<>();
+
+    /**
+     * Returns the theme associated with the current thread.
+     *
+     * @return a non-null instance
+     * @see ApplicationService#getCurrentTheme()
+     */
+    public static Optional<AssetBundle> get() {
+        return ofNullable(ASSET_BUNDLE.get());
+    }
+
+    /**
+     * Changes the asset bundle associated with the current thread.
+     *
+     * @param bundle the asset bundle, null to remove and fall back to default
+     * @see ApplicationService#getCurrentTheme()
+     */
+    public static void set(AssetBundle bundle) {
+        if (bundle != null) {
+            ASSET_BUNDLE.set(bundle);
+        } else {
+            clear();
+        }
+    }
+
+    /**
+     * Removes the asset bundle associated with the current thread.
+     */
+    public static void clear() {
+        ASSET_BUNDLE.remove();
+    }
+
+    /**
+     * Registers an asset to the current asset bundle.
+     *
+     * @param asset the asset to register
+     * @see AssetBundle#get()
+     */
+    public static void register(Asset asset) {
+        requireNonNull(asset);
+        AssetBundle current = ASSET_BUNDLE.get();
+        if (current != null) current.addAsset(asset);
+    }
 
     /**
      * Creates an asset bundle builder.

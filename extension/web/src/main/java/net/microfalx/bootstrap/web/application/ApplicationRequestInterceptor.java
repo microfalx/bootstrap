@@ -114,7 +114,7 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
             if (isNotEmpty(themeInfo.getMode())) {
                 theme = theme.withMode(net.microfalx.bootstrap.web.application.Theme.Mode.of(themeInfo.getMode()));
             }
-            ApplicationService.THEME.set(theme);
+            Theme.set(theme);
         } catch (ApplicationException e) {
             LOGGER.warn("A theme with identifier '{}' is not registered", themeInfo);
         } catch (Exception e) {
@@ -126,14 +126,15 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         handleTheme(request, handler);
-        ApplicationService.APPLICATION.set(defaultIfEmpty(request.getHeader("X-Application-Id"), "na"));
+        Application.set(defaultIfEmpty(request.getHeader("X-Application-Id"), "na"));
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        ApplicationService.THEME.remove();
-        ApplicationService.APPLICATION.remove();
+        Theme.clear();
+        Application.clear();
+        AssetBundle.clear();
     }
 
     @Getter
