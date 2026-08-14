@@ -302,6 +302,9 @@ Application.getHeaders = function () {
         "X-TimeZone": Application.getTimezoneOffset()
     };
     if (APP_CSRF !== false) headers[APP_CSRF.headerName] = APP_CSRF.token;
+    let localStorage = {};
+    LocalStorage.copy(localStorage);
+    headers["X-Application-LocalState"] = JSON.stringify(localStorage);
     return headers;
 }
 
@@ -917,6 +920,7 @@ Application.initialize = function () {
     Logger.debug("Initialize application, request path '" + this.getPath() + "', request arguments '" + Utils.toString(this.getQuery()) + "'");
     this.initEvents();
     this.initTimeZone();
+    LocalStorage.init();
 }
 
 /**
