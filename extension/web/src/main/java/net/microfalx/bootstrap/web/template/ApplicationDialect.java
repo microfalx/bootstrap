@@ -8,6 +8,7 @@ import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.search.SearchUtils;
 import net.microfalx.bootstrap.security.userinfo.ExtendedUserDetails;
 import net.microfalx.bootstrap.web.application.ApplicationService;
+import net.microfalx.bootstrap.web.application.LocalStorage;
 import net.microfalx.bootstrap.web.application.Theme;
 import net.microfalx.bootstrap.web.chart.ChartService;
 import net.microfalx.bootstrap.web.container.WebContainerRequest;
@@ -182,12 +183,14 @@ public class ApplicationDialect extends AbstractProcessorDialect {
             Theme theme = applicationService.getCurrentTheme();
             builder.append("\nconst APP_THEME=\"").append(theme.getId()).append("\";");
             builder.append("\nconst APP_THEME_MODE=\"").append(theme.getMode().name().toLowerCase()).append("\";");
+            String localStorageJson = LocalStorage.isEmpty() ? "null" : linkTool.toJson(LocalStorage.get().toMap());
+            builder.append("\nconst APP_LOCAL_STORAGE=").append(localStorageJson).append(";");
             String filterableOperator = defaultIfEmpty(dataSetTool.getFilterableOperator(), SearchUtils.DEFAULT_FILTER_OPERATOR);
-            builder.append("\nconst DATASET_FILTERABLE_OPERATOR=\"").append(filterableOperator).append("\"");
+            builder.append("\nconst DATASET_FILTERABLE_OPERATOR=\"").append(filterableOperator).append("\";");
             String filterableQuoteChar = defaultIfEmpty(dataSetTool.getFilterableQuoteChar(), String.valueOf(SearchUtils.DEFAULT_FILTER_QUOTE_CHAR));
-            builder.append("\nconst DATASET_FILTERABLE_QUOTE_CHAR=\"").append(escapeEcmaScript(filterableQuoteChar)).append("\"");
-            builder.append("\nconst SEARCH_ENGINE_FILTERABLE_OPERATOR=\"").append(SearchUtils.DEFAULT_FILTER_OPERATOR).append("\"");
-            builder.append("\nconst SEARCH_ENGINE_FILTERABLE_QUOTE_CHAR=\"").append(escapeEcmaScript(String.valueOf(SearchUtils.DEFAULT_FILTER_QUOTE_CHAR))).append("\"");
+            builder.append("\nconst DATASET_FILTERABLE_QUOTE_CHAR=\"").append(escapeEcmaScript(filterableQuoteChar)).append("\";");
+            builder.append("\nconst SEARCH_ENGINE_FILTERABLE_OPERATOR=\"").append(SearchUtils.DEFAULT_FILTER_OPERATOR).append("\";");
+            builder.append("\nconst SEARCH_ENGINE_FILTERABLE_QUOTE_CHAR=\"").append(escapeEcmaScript(String.valueOf(SearchUtils.DEFAULT_FILTER_QUOTE_CHAR))).append("\";");
             builder.append('\n').append(SCRIPT_START_END);
             structureHandler.replaceWith(TextUtils.insertSpaces(builder.toString(), tag.getCol()), false);
 

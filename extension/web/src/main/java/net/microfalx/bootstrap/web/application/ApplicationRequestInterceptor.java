@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import net.microfalx.bootstrap.core.utils.Json;
 import net.microfalx.bootstrap.web.application.annotation.SystemTheme;
 import net.microfalx.lang.AnnotationUtils;
 import net.microfalx.lang.ClassUtils;
@@ -18,9 +19,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.*;
 
 /**
@@ -123,9 +126,21 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
         }
     }
 
+    private void handleLocalStorage(HttpServletRequest request) {
+        String json = request.getHeader("X-Application-LocalState");
+        if (isNotEmpty(json)) {
+            try {
+                Json.asMap(json).forEach(LocalStorage::set);
+            } catch (IOException e) {
+                rethrowException(e);
+            }
+        }
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         handleTheme(request, handler);
+        handleLocalStorage(request);
         Application.set(defaultIfEmpty(request.getHeader("X-Application-Id"), "na"));
         return true;
     }
@@ -135,6 +150,7 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
         Theme.clear();
         Application.clear();
         AssetBundle.clear();
+        LocalStorage.clear();
     }
 
     @Getter

@@ -24,6 +24,7 @@
         <asset path="utils.js" type="script"/>
         <asset path="logger.js" type="script"/>
         <asset path="configuration.js" type="script"/>
+        <asset path="local_storage.js" type="script"/>
         <asset path="core.js" type="script"/>
         <asset path="user.js" type="script"/>
         <asset path="alert.js" type="script"/>
