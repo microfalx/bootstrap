@@ -365,15 +365,18 @@ Application.getHashUrl = function () {
  * Saves a form.
  *
  * @param {Element|String} selector the element or selector for form
- * @param {String} path the path where to send the form
- * @param {Object} params the query parameters for the form
+ * @param {String} [path] the path where to send the form
+ * @param {Object} [params] the query parameters for the form
  * @param {Object} [options] the used to control the form
  */
 Application.saveForm = function (selector, path, params, options) {
     Utils.requireNonNull(selector);
     let me = Application;
     options = options || {};
+    params = params || {};
     let form = $(selector);
+    if (Utils.isEmpty(path)) path = form.attr('action');
+    if (Utils.isEmpty(path)) throw new Error("Path or Form.action attribute must be specified");
     let url = this.getUri(path, params, {params: false, self: options.self});
     let headers = this.getHeaders();
     let before = options.before;
@@ -733,14 +736,18 @@ Application.checkServerStatus = function (pings) {
 /**
  * Masks the element with a given selector.
  *
+ * Outside standard options provided by the library, passing small = true will configure the mask with
+ * a small animated icon.
+ *
  * @param {String} [selector] the DOM selector to mask, if not provided the whole body will be masked *
  * @param {Object} [options] additional options passed to the overlay library (see https://gasparesganga.com/labs/jquery-loading-overlay/#options-and-defaults-values)
  */
 Application.mask = function (selector, options) {
-    options = Utils.applyIf(options || {}, {
-        image: ""
-    });
-    if (Utils.isEmpty(options.custom) && Utils.isEmpty(options.message)) {
+    options = options || {};
+    let cardClass = $('.card');
+    const cardBackground = Utils.addAlpha(cardClass.css('background-color'), 0.7);
+    const cardColor = cardClass.css('color');
+    if (options.small) {
         options = Utils.applyIf(options, {
             fontawesome: "fa-solid fa-arrows-rotate",
             fontawesomeAnimation: 'rotate_right',
@@ -748,6 +755,11 @@ Application.mask = function (selector, options) {
             maxSize: 40
         });
     }
+    options = Utils.applyIf(options, {
+        textColor: cardColor,
+        imageColor : cardColor,
+        background: cardBackground
+    });
     $.LoadingOverlaySetup(options);
     if (selector) {
         $(selector).LoadingOverlay("show");

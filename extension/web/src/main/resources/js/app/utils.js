@@ -268,7 +268,7 @@ Utils.formatMillis = function (value, units) {
                 displayValue = mins + 'm ' + secs + 's ' + ms + "ms";
             }
         } else {
-            displayValue = hrs + 'h ' + mins + 'm ' + secs + 's ' + msp+ "ms";
+            displayValue = hrs + 'h ' + mins + 'm ' + secs + 's ' + msp + "ms";
         }
     } else {
         if (hrs === 0) {
@@ -378,12 +378,14 @@ Utils.intercept = function (value, interceptor) {
 }
 
 /**
-* Clears all the properties from the given object
-* @param {Object} object the object to clear
-*/
-Utils.clear = function(object) {
+ * Clears all the properties from the given object
+ * @param {Object} object the object to clear
+ */
+Utils.clear = function (object) {
     if (object) {
-        Object.keys(object).forEach(key => { delete object[key]; });
+        Object.keys(object).forEach(key => {
+            delete object[key];
+        });
     }
 }
 
@@ -432,5 +434,19 @@ Utils.applyIf = function (target, source) {
  */
 Utils.uuid = function () {
     return Utils.ID_GENERATOR++;
+}
+
+/**
+ * Adds an alpha channel to an RGB color string.
+ *
+ * @param {String} rgbString
+ * @param {Number} alpha
+ * @returns {string}
+ */
+Utils.addAlpha = function (rgbString, alpha) {
+    const matches = rgbString.match(/\d+/g);
+    if (!matches || matches.length < 3) return rgbString;
+    const [r, g, b] = matches;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
