@@ -129,6 +129,7 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
     private void handleLocalStorage(HttpServletRequest request) {
         String json = request.getHeader("X-Application-LocalState");
         if (isNotEmpty(json)) {
+            LOGGER.debug("Received local storage state from client {}, entries {}", json, request.getRequestURI());
             try {
                 Json.asMap(json).forEach(LocalStorage::set);
             } catch (IOException e) {
