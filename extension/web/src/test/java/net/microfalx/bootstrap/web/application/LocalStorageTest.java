@@ -20,7 +20,7 @@ class LocalStorageTest {
     void setAndGetAsMap() {
         LocalStorage.set("language", "en");
 
-        Map<String, Object> values = LocalStorage.get().toMap();
+        Map<String, Object> values = LocalStorage.current().toMap();
 
         assertThat(LocalStorage.has("language")).isTrue();
         assertThat(values).containsEntry("language", "en");
@@ -33,7 +33,7 @@ class LocalStorageTest {
         LocalStorage.remove("theme");
 
         assertThat(LocalStorage.has("theme")).isFalse();
-        assertThat(LocalStorage.get().toMap()).doesNotContainKey("theme");
+        assertThat(LocalStorage.current().toMap()).doesNotContainKey("theme");
     }
 
     @Test
@@ -42,7 +42,7 @@ class LocalStorageTest {
 
         LocalStorage.clear();
 
-        assertThat(LocalStorage.get().toMap()).isEmpty();
+        assertThat(LocalStorage.current().toMap()).isEmpty();
     }
 
     @Test
@@ -59,7 +59,7 @@ class LocalStorageTest {
 
         Thread thread = new Thread(() -> {
             LocalStorage.set("tenant", "worker-thread");
-            valuesFromOtherThread.set(LocalStorage.get().toMap());
+            valuesFromOtherThread.set(LocalStorage.current().toMap());
             LocalStorage.clear();
         });
         thread.start();
@@ -67,7 +67,7 @@ class LocalStorageTest {
 
         assertThat(valuesFromOtherThread.get()).containsEntry("tenant", "worker-thread");
         assertThat(valuesFromOtherThread.get()).doesNotContainEntry("tenant", "main-thread");
-        assertThat(LocalStorage.get().toMap()).containsEntry("tenant", "main-thread");
+        assertThat(LocalStorage.current().toMap()).containsEntry("tenant", "main-thread");
     }
 }
 
