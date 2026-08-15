@@ -183,7 +183,7 @@ public class ApplicationDialect extends AbstractProcessorDialect {
             Theme theme = applicationService.getCurrentTheme();
             builder.append("\nconst APP_THEME=\"").append(theme.getId()).append("\";");
             builder.append("\nconst APP_THEME_MODE=\"").append(theme.getMode().name().toLowerCase()).append("\";");
-            String localStorageJson = LocalStorage.isEmpty() ? "null" : linkTool.toJson(LocalStorage.get().toMap());
+            String localStorageJson = LocalStorage.isEmpty() ? "null" : linkTool.toJson(LocalStorage.current().toMap());
             builder.append("\nconst APP_LOCAL_STORAGE=").append(localStorageJson).append(";");
             String filterableOperator = defaultIfEmpty(dataSetTool.getFilterableOperator(), SearchUtils.DEFAULT_FILTER_OPERATOR);
             builder.append("\nconst DATASET_FILTERABLE_OPERATOR=\"").append(filterableOperator).append("\";");

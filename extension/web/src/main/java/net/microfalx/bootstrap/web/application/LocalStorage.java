@@ -21,7 +21,7 @@ public class LocalStorage {
      *
      * @return a non-null instance
      */
-    public static LocalStorage get() {
+    public static LocalStorage current() {
         return LOCAL_STORAGE.get();
     }
 
@@ -30,9 +30,33 @@ public class LocalStorage {
      *
      * @param id the id, null to remove (not applicable for local storage)
      */
-    public static void set(String id, Object value) {
+    @SuppressWarnings("unchecked")
+    public static <T> T get(String id) {
         requireNonNull(id);
-        get().storage.put(id, value);
+        return (T) current().storage.get(id);
+    }
+
+    /**
+     * Changes the local storage instance associated with the current thread.
+     *
+     * @param id the id, null to remove (not applicable for local storage)
+     */
+    public static <T> void set(String id, T value) {
+        requireNonNull(id);
+        current().storage.put(id, value);
+    }
+
+    /**
+     * Marks the entry as "to be cleared" from local storage instance associated with the current thread.
+     * <p>
+     * A clear operation is replicated to the client local storage, which is different from a remove operation,
+     * which is not replicated to the client local storage.
+     *
+     * @param id the id of the value to remove
+     */
+    public static void clear(String id) {
+        requireNonNull(id);
+        current().storage.put(id, null);
     }
 
     /**
@@ -42,7 +66,7 @@ public class LocalStorage {
      */
     public static void remove(String id) {
         requireNonNull(id);
-        get().storage.remove(id);
+        current().storage.remove(id);
     }
 
     /**
@@ -55,7 +79,7 @@ public class LocalStorage {
      */
     public static boolean has(String id) {
         requireNonNull(id);
-        return get().storage.containsKey(id);
+        return current().storage.containsKey(id);
     }
 
     /**
@@ -64,7 +88,7 @@ public class LocalStorage {
      * @return {@code true} if the local storage is empty, {@code false} otherwise
      */
     public static boolean isEmpty() {
-        return get().storage.isEmpty();
+        return current().storage.isEmpty();
     }
 
     /**
