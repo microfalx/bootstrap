@@ -183,7 +183,7 @@ class ApplicationAppenders {
     private PatternLayoutEncoder createLayoutEncoder(LoggerContext context) {
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSSXXX} %-5level [%-15thread] %logger{-36} : %msg%n");
+        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSSXXX} %-5level [%-15thread] %logger{-36} :%X{}: %msg%n");
         encoder.start();
         return encoder;
     }

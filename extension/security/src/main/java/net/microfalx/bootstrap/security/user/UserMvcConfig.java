@@ -2,6 +2,8 @@ package net.microfalx.bootstrap.security.user;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.microfalx.bootstrap.security.SecurityContext;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -10,8 +12,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static net.microfalx.bootstrap.web.application.ApplicationUtils.getShortId;
+
 @Configuration
 public class UserMvcConfig implements WebMvcConfigurer {
+
+    private static final int MAX_USER_ID_LENGTH = -10;
 
     @Autowired
     private UserService userService;
@@ -26,7 +32,9 @@ public class UserMvcConfig implements WebMvcConfigurer {
 
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-            SecurityContextImpl.CONTEXT.set(userService.getCurrentSecurityContext());
+            SecurityContext securityContext = userService.getCurrentSecurityContext();
+            SecurityContextImpl.CONTEXT.set(securityContext);
+            MDC.put("UserId", getShortId(securityContext.getUser().getUsername(), MAX_USER_ID_LENGTH));
             return true;
         }
 

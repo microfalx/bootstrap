@@ -13,6 +13,7 @@ import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -138,11 +139,22 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
         }
     }
 
+    private void handleApplicationId(HttpServletRequest request) {
+        String appId = defaultIfEmpty(request.getHeader("X-Application-Id"), "na");
+        Application.set(appId);
+        MDC.put("AppId", ApplicationUtils.getShortId(appId));
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String sessionId = ApplicationUtils.getShortId(session.getId());
+            MDC.put("HttpId", sessionId);
+        }
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         handleTheme(request, handler);
+        handleApplicationId(request);
         handleLocalStorage(request);
-        Application.set(defaultIfEmpty(request.getHeader("X-Application-Id"), "na"));
         return true;
     }
 
