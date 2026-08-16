@@ -37,6 +37,9 @@
         <asset path="content.js" type="script"/>
     </asset-bundle>
 
+    <asset-bundle id="dynamic" name="Dynamic" order="10000">
+    </asset-bundle>
+
     <!-- Help  -->
     <asset-bundle id="help" path="help" name="Help" order="505">
         <depends-on-asset-bundle>app</depends-on-asset-bundle>
