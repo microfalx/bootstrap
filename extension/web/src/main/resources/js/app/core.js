@@ -150,6 +150,7 @@ Application.logout = function () {
     });
     this.mask(null, {
         size: false,
+        image: false,
         custom: messageElement
     });
     Utils.defer(function () {
@@ -690,6 +691,7 @@ Application.showSessionLost = function () {
     });
     this.mask(null, {
         size: false,
+        image: false,
         custom: messageElement
     });
 }
@@ -713,6 +715,7 @@ Application.showConnectionLost = function () {
     });
     this.mask(null, {
         size: false,
+        image: false,
         custom: messageElement
     });
 }
@@ -757,7 +760,7 @@ Application.mask = function (selector, options) {
     }
     options = Utils.applyIf(options, {
         textColor: cardColor,
-        imageColor : cardColor,
+        imageColor: cardColor,
         background: cardBackground
     });
     $.LoadingOverlaySetup(options);
