@@ -8,6 +8,7 @@ import net.microfalx.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Optional.ofNullable;
 import static net.microfalx.bootstrap.web.application.ApplicationUtils.NO_VERSION;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -50,20 +51,6 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
     }
 
     /**
-     * Changes the asset bundle associated with the current thread.
-     *
-     * @param bundle the asset bundle, null to remove and fall back to default
-     * @see ApplicationService#getCurrentTheme()
-     */
-    public static void set(AssetBundle bundle) {
-        if (bundle != null) {
-            ASSET_BUNDLE.set(bundle);
-        } else {
-            clear();
-        }
-    }
-
-    /**
      * Removes the asset bundle associated with the current thread.
      */
     public static void clear() {
@@ -79,7 +66,11 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
     public static void register(Asset asset) {
         requireNonNull(asset);
         AssetBundle current = ASSET_BUNDLE.get();
-        if (current != null) current.addAsset(asset);
+        if (current == null) {
+            current = new AssetBundle.Builder("dynamic_per_thread").inline(true).build();
+            ASSET_BUNDLE.set(current);
+        }
+        current.addAsset(asset);
     }
 
     /**
@@ -159,7 +150,7 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
      * @return {@code true} if inline, {@code false} otherwise
      */
     public boolean isInline() {
-        return inline;
+        return isDynamic() || inline;
     }
 
     /**
@@ -179,12 +170,16 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
      */
     public boolean has(Asset.Type type) {
         requireNonNull(type);
-        return switch (type) {
-            case JAVA_SCRIPT -> hasJs;
-            case STYLE_SHEET -> hasCss;
-            case FONT -> hasFont;
-            case IMAGE -> hasImage;
-        };
+        if (isDynamic()) {
+            return getDynamic().has(type);
+        } else {
+            return switch (type) {
+                case JAVA_SCRIPT -> hasJs;
+                case STYLE_SHEET -> hasCss;
+                case FONT -> hasFont;
+                case IMAGE -> hasImage;
+            };
+        }
     }
 
     /**
@@ -206,7 +201,11 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
      * @return a non-null collection
      */
     public Collection<Asset> getAssets() {
-        return Collections.unmodifiableCollection(assets);
+        if (isDynamic()) {
+            return getDynamic().getAssets();
+        } else {
+            return unmodifiableCollection(assets);
+        }
     }
 
     /**
@@ -277,6 +276,14 @@ public final class AssetBundle implements Identifiable<String>, Nameable, Descri
         if (this.external && externalCount != this.assets.size()) {
             throw new IllegalStateException("An asset bundle cannot mix external and non-external assets");
         }
+    }
+
+    private boolean isDynamic() {
+        return "dynamic".equals(getId()) && AssetBundle.get().isPresent();
+    }
+
+    private static AssetBundle getDynamic() {
+        return AssetBundle.get().orElseThrow(() -> new IllegalStateException("No dynamic asset bundle is set"));
     }
 
     @Override

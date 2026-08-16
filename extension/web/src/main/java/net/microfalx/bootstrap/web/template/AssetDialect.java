@@ -57,10 +57,15 @@ public class AssetDialect extends AbstractProcessorDialect {
 
         @Override
         protected void doProcess(ITemplateContext context, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
-            if (isInline(tag)) {
-                writeInline(getType(), tag, structureHandler);
+            String[] bundles = getBundles(tag);
+            if (areBundlesEmpty(bundles)) {
+                structureHandler.replaceWith("", false);
             } else {
-                writeTags(getType(), tag, structureHandler);
+                if (isInline(tag)) {
+                    writeInline(getType(), bundles, tag, structureHandler);
+                } else {
+                    writeTags(getType(), bundles, tag, structureHandler);
+                }
             }
         }
 
@@ -87,8 +92,7 @@ public class AssetDialect extends AbstractProcessorDialect {
             builder.append(">\n");
         }
 
-        protected void writeInline(Asset.Type type, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
-            String[] bundles = getBundles(tag);
+        protected void writeInline(Asset.Type type, String[] bundles, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
             StringBuilder builder = new StringBuilder();
             try {
                 Resource content = applicationService.getAssetBundlesContent(type, false, bundles);
@@ -102,11 +106,18 @@ public class AssetDialect extends AbstractProcessorDialect {
             }
         }
 
-        protected void writeTags(Asset.Type type, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
-            String[] bundles = getBundles(tag);
+        protected void writeTags(Asset.Type type, String[] bundles, IProcessableElementTag tag, IElementTagStructureHandler structureHandler) {
             Collection<AssetBundle> assetBundles = applicationService.getAssetBundles(bundles);
             String tags = applicationService.getAssetBundleTags(type, tag.getCol() - 1, assetBundles);
             structureHandler.replaceWith(tags, false);
+        }
+
+        private boolean areBundlesEmpty(String[] bundles) {
+            if (bundles.length == 0) return false;
+            for (String bundle : bundles) {
+                if (!applicationService.getAssetBundle(bundle).getAssets().isEmpty()) return false;
+            }
+            return true;
         }
     }
 

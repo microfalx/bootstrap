@@ -14,6 +14,7 @@
     <application:context></application:context>
     <asset:js inline="true" bundles="theme"></asset:js>
     <asset:css inline="true" bundles="theme"></asset:css>
+    <asset:css inline="true" bundles="dynamic"></asset:css>
 </head>
 
 <span th:fragment="help" th:if="${#help.hasHelp()}">
@@ -28,6 +29,7 @@
 
 <div th:fragment="code" th:remove="tag">
     <asset:js></asset:js>
+    <asset:js inline="true" bundles="dynamic"></asset:js>
     <asset:js inline="true" bundles="loader"></asset:js>
     <script>
         Application.start();
