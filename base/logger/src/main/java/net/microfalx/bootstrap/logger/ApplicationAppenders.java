@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.filter.LevelFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -116,6 +118,8 @@ class ApplicationAppenders {
         // log all errors in one file
         net.microfalx.bootstrap.logger.Appender errorAppender = net.microfalx.bootstrap.logger.Appender.builder("process.error").build();
         registerAppender(errorAppender, Level.ERROR);
+        // log all http requests
+        registerRequestAppender();
     }
 
     private void registerAllAppender() {
@@ -129,13 +133,28 @@ class ApplicationAppenders {
         LoggerContext loggerContext = getLoggerContext();
         ch.qos.logback.classic.Logger logger = getRootLogger();
         FileAppender<ILoggingEvent> warnFileAppender = createAppender(appender, loggerContext);
+        warnFileAppender.addFilter(createLevelFilter(level));
+        logger.addAppender(warnFileAppender);
+    }
+
+    private LevelFilter createLevelFilter(Level level) {
         LevelFilter filter = new LevelFilter();
         filter.setLevel(level);
         filter.setOnMatch(FilterReply.ACCEPT);
         filter.setOnMismatch(FilterReply.DENY);
         filter.start();
-        warnFileAppender.addFilter(filter);
-        logger.addAppender(warnFileAppender);
+        return filter;
+    }
+
+    private void registerRequestAppender() {
+        LoggerContext loggerContext = getLoggerContext();
+        net.microfalx.bootstrap.logger.Appender allAppender = net.microfalx.bootstrap.logger.Appender.builder("process.request").build();
+        FileAppender<ILoggingEvent> requestFileAppender = createAppender(allAppender, loggerContext);
+        MdcPresenceFilter mdcFilter = new MdcPresenceFilter("ReqId");
+        mdcFilter.start();
+        requestFileAppender.addFilter(mdcFilter);
+        requestFileAppender.addFilter(createLevelFilter(Level.INFO));
+        getRootLogger().addAppender(requestFileAppender);
     }
 
     private FileAppender<ILoggingEvent> createAppender(net.microfalx.bootstrap.logger.Appender appender, LoggerContext context) {
@@ -262,5 +281,24 @@ class ApplicationAppenders {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     private static final Pattern RETAIN_LOG_PATTERN = Pattern.compile("boot\\.(.*)\\.log");
+
+    private static class MdcPresenceFilter extends Filter<ILoggingEvent> {
+
+        private final String requiredKey;
+
+        public MdcPresenceFilter(String requiredKey) {
+            this.requiredKey = requiredKey;
+        }
+
+        @Override
+        public FilterReply decide(ILoggingEvent event) {
+            Map<String, String> mdcContext = event.getMDCPropertyMap();
+            if (mdcContext != null && mdcContext.containsKey(requiredKey)) {
+                return FilterReply.NEUTRAL;
+            } else {
+                return FilterReply.DENY;
+            }
+        }
+    }
 
 }

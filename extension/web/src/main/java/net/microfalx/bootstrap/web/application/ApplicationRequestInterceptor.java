@@ -10,6 +10,7 @@ import net.microfalx.bootstrap.core.utils.Json;
 import net.microfalx.bootstrap.web.application.annotation.SystemTheme;
 import net.microfalx.lang.AnnotationUtils;
 import net.microfalx.lang.ClassUtils;
+import net.microfalx.lang.IdGenerator;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRequestInterceptor.class);
 
+    private static final IdGenerator REQUEST_ID_GENERATOR = IdGenerator.get("http.request");
     private static final String THEME_QUERY_PARAMETER = "_theme";
     private static final String THEME_MODE_QUERY_PARAMETER = "_theme_mode";
     private static final String THEME_SESSION_ATTR = "$APPLICATION_THEME$";
@@ -143,6 +145,7 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
         String appId = defaultIfEmpty(request.getHeader("X-Application-Id"), "na");
         Application.set(appId);
         MDC.put("AppId", ApplicationUtils.getShortId(appId));
+        MDC.put("ReqId", REQUEST_ID_GENERATOR.nextAsString());
         HttpSession session = request.getSession(false);
         if (session != null) {
             String sessionId = ApplicationUtils.getShortId(session.getId());

@@ -9,6 +9,7 @@ import net.microfalx.bootstrap.web.util.PathFilter;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Action;
 import net.microfalx.lang.annotation.Module;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
@@ -64,6 +65,12 @@ public class AuditMvcConfig implements WebMvcConfigurer {
     }
 
     private class Interceptor implements HandlerInterceptor {
+
+        @Override
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+            MDC.put("ClientIP", HttpServletUtils.getClientIp(request));
+            return true;
+        }
 
         @Override
         public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
