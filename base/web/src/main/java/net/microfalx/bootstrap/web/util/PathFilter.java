@@ -176,6 +176,8 @@ public class PathFilter {
         registerExclusionPattern("**/*.cfm");
         registerExclusionPattern("**/.env*");
         registerExclusionPattern("**/.git");
+        registerExclusionPattern("**/.axd");
+        registerExclusionPattern("**/.git");
         registerExclusionPattern("**/wp-content*");
         registerExclusionPattern("**/wp-admin*");
         registerExclusionPattern("**/wp-includes*");
