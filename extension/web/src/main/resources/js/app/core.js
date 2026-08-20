@@ -365,6 +365,23 @@ Application.getHashUrl = function () {
 /**
  * Saves a form.
  *
+ * The form needs to have its action attribute set to the path where the form will be submitted.
+ *
+ * @param {Element|String} selector the element or selector for form
+ * @param {Object} [params] the query parameters for the form
+ * @param {Object} [options] the used to control the form
+ */
+Application.saveFormWithAction = function (selector, params, options) {
+    Utils.requireNonNull(selector);
+    let form = $(selector);
+    let path = form.attr('action');
+    if (Utils.isEmpty(path)) throw new Error("Path or Form.action attribute must be specified");
+    this.saveForm(form, path, params, options);
+}
+
+/**
+ * Saves a form.
+ *
  * @param {Element|String} selector the element or selector for form
  * @param {String} [path] the path where to send the form
  * @param {Object} [params] the query parameters for the form
@@ -376,8 +393,6 @@ Application.saveForm = function (selector, path, params, options) {
     options = options || {};
     params = params || {};
     let form = $(selector);
-    if (Utils.isEmpty(path)) path = form.attr('action');
-    if (Utils.isEmpty(path)) throw new Error("Path or Form.action attribute must be specified");
     let url = this.getUri(path, params, {params: false, self: options.self});
     let headers = this.getHeaders();
     let before = options.before;
