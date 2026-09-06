@@ -92,6 +92,7 @@
         <jdbcpool.version>1.0.2-SNAPSHOT</jdbcpool.version>
         <threadpool.version>1.0.2-SNAPSHOT</threadpool.version>
         <webjar.version>1.0.2-SNAPSHOT</webjar.version>
+        <argus.version>1.0.0-SNAPSHOT</argus.version>
 
         <spring.boot.version>3.5.16</spring.boot.version>
     </properties>
@@ -114,14 +115,6 @@
                 <groupId>net.microfalx.bom</groupId>
                 <artifactId>bom-spring</artifactId>
                 <version>${bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.webjar</groupId>
-                <artifactId>webjar-bom</artifactId>
-                <version>${webjar.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -190,6 +183,22 @@
                 <groupId>net.microfalx</groupId>
                 <artifactId>configuration</artifactId>
                 <version>${configuration.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.webjar</groupId>
+                <artifactId>webjar-bom</artifactId>
+                <version>${webjar.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.argus</groupId>
+                <artifactId>argus-bom</artifactId>
+                <version>${argus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>

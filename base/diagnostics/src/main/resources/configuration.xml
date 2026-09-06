@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<configuration xmlns="https://net.microfalx/xsd/configuration-1.0.xsd">
+
+    <group key="bootstrap.diagnostics" name="Diagnostics" section="System" description="Diagnostics configuration">
+
+        <item key="collectionInterval" name="Collection Interval" data-type="duration" default="10s" description="The interval between metric collection"/>
+    </group>
+
+</configuration>
