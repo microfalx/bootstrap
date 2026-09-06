@@ -1,9 +1,9 @@
 package net.microfalx.bootstrap.test.answer;
 
-import net.microfalx.bootstrap.registry.Registry;
 import net.microfalx.bootstrap.registry.RegistryService;
-import net.microfalx.bootstrap.registry.Storage;
 import net.microfalx.bootstrap.test.annotation.AnswerFor;
+import net.microfalx.registry.Registry;
+import net.microfalx.registry.core.MemoryStorage;
 import org.mockito.internal.util.MockUtil;
 import org.mockito.invocation.InvocationOnMock;
 
@@ -20,7 +20,8 @@ public class RegistryAnswer extends AbstractAnswer {
         if (registryService != null && !MockUtil.isMock(registryService)) {
             registry = registryService.getRegistry();
         } else {
-            registry = Registry.create(Storage.create());
+            registry = net.microfalx.registry.RegistryService.getInstance()
+                    .getRegistry(new MemoryStorage());
         }
     }
 

@@ -50,10 +50,5 @@ class ConfigurationServiceTest extends AbstractConfigurationTestCase {
         assertEquals(false, configurationService.getConfiguration().get("group1.group12.item5", boolean.class, null));
     }
 
-    @Test
-    void convert() {
-        assertEquals(1, configurationService.convert("a", "1", Integer.class));
-    }
-
 
 }

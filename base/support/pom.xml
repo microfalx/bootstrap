@@ -58,13 +58,25 @@
         </dependency>
 
         <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-base-app</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>net.lingala.zip4j</groupId>
-            <artifactId>zip4j</artifactId>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-base-diagnostics</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-report</artifactId>
         </dependency>
 
         <!-- Testing -->

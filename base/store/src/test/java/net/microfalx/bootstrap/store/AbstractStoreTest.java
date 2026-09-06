@@ -11,8 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @ExtendWith(MockitoExtension.class)
 public abstract class AbstractStoreTest {
 
-    @Spy
-    private ResourceService resourceService = new ResourceService();
+    @Spy private ResourceService resourceService = new ResourceService();
 
     @Spy
     private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();

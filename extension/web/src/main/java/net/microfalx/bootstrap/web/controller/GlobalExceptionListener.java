@@ -2,8 +2,8 @@ package net.microfalx.bootstrap.web.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.core.utils.Failure;
-import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.bootstrap.web.util.HttpServletUtils;
 import net.microfalx.bootstrap.web.util.PathFilter;
 import net.microfalx.lang.ClassUtils;

@@ -33,7 +33,7 @@ import static net.microfalx.resource.ResourceUtils.toUri;
 @CustomLog
 public class ResourceService implements InitializingBean {
 
-    @Autowired private ThreadPool threadPool;
+    @Autowired private ThreadPool threadPool = ThreadPool.get();
     @Autowired(required = false) private ResourceProperties properties = new ResourceProperties();
 
     private final ClassPathManager classPathManager = new ClassPathManager();

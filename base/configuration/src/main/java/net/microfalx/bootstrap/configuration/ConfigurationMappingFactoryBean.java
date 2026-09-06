@@ -1,6 +1,7 @@
 package net.microfalx.bootstrap.configuration;
 
 import net.microfalx.bootstrap.configuration.annotation.ConfigurationMapping;
+import net.microfalx.configuration.Subset;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ReflectionUtils;
 import net.microfalx.lang.SecretUtils;
@@ -55,7 +56,8 @@ public class ConfigurationMappingFactoryBean<T> implements FactoryBean<T>, Invoc
             return "Configuration{prefix=" + prefix + ",entries=" + describeEntries() + "}";
         } else if (methodName.equals("addListener")) {
             ConfigurationListener listener = (ConfigurationListener) args[0];
-            configurationService.addListener(new PrefixForwardConfigurationListener(prefix, listener));
+            // TODO forward me
+            //configurationService.addListener(new PrefixForwardConfigurationListener(prefix, listener));
             return null;
         } else {
             String propertyName = resolvePropertyName(method);

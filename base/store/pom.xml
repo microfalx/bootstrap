@@ -52,8 +52,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
+            <groupId>net.microfalx.store</groupId>
+            <artifactId>store-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.store</groupId>
+            <artifactId>store-rocksdb</artifactId>
         </dependency>
 
     </dependencies>

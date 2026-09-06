@@ -83,19 +83,7 @@
 
             <dependency>
                 <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-base-metrics</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-base-feature</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-base-registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

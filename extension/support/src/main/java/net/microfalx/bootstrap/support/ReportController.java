@@ -1,7 +1,7 @@
 package net.microfalx.bootstrap.support;
 
 import jakarta.annotation.security.RolesAllowed;
-import net.microfalx.bootstrap.support.report.Report;
+import net.microfalx.argus.report.Report;
 import net.microfalx.bootstrap.support.report.ReportService;
 import net.microfalx.bootstrap.web.application.ApplicationService;
 import net.microfalx.bootstrap.web.application.Theme;

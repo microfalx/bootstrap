@@ -1,5 +1,7 @@
 package net.microfalx.bootstrap.store;
 
+import net.microfalx.store.api.Store;
+import net.microfalx.store.api.StoreException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

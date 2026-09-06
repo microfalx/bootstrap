@@ -52,8 +52,8 @@
         </dependency>
 
         <dependency>
-            <groupId>biz.paluch.logging</groupId>
-            <artifactId>logstash-gelf</artifactId>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-logger</artifactId>
         </dependency>
 
         <!-- Testing -->

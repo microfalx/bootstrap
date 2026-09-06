@@ -1,5 +1,7 @@
 package net.microfalx.bootstrap.configuration;
 
+import net.microfalx.configuration.ConfigurationEvent;
+
 /**
  * A listener used to notify services of configuration changes.
  */

@@ -3,12 +3,11 @@ package net.microfalx.bootstrap.support.alert;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.argus.api.LoggerEvent;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.Formatters;
 import net.microfalx.bootstrap.dataset.model.IdentityAware;
-import net.microfalx.bootstrap.logger.AlertEvent;
-import net.microfalx.bootstrap.logger.LoggerEvent;
 import net.microfalx.lang.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -79,7 +78,7 @@ public class Alert extends IdentityAware<String> {
     @Timestamp
     private LocalDateTime modifiedAt;
 
-    public static Alert from(AlertEvent event) {
+    public static Alert from(net.microfalx.argus.api.Alert event) {
         if (event == null) return null;
         Alert model = new Alert();
         model.setId(event.getId());

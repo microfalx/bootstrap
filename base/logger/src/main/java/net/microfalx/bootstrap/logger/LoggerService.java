@@ -1,73 +1,27 @@
 package net.microfalx.bootstrap.logger;
 
-import biz.paluch.logging.gelf.logback.GelfLogbackAppender;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.net.SyslogAppender;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
+import net.microfalx.argus.api.Alert;
+import net.microfalx.argus.api.LoggerSettings;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.bootstrap.resource.ResourceService;
-import net.microfalx.bootstrap.store.Query;
-import net.microfalx.bootstrap.store.Store;
-import net.microfalx.bootstrap.store.StoreService;
-import net.microfalx.lang.ClassUtils;
-import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.lang.StringUtils;
-import net.microfalx.resource.Resource;
-import net.microfalx.threadpool.ThreadPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.microfalx.lang.EnumUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static net.microfalx.bootstrap.logger.LoggerUtils.*;
-import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.defaultIfNull;
 
 @Service
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class LoggerService extends ApplicationContextSupport implements InitializingBean, LoggerListener {
+public class LoggerService extends ApplicationContextSupport implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggerService.class);
-
-    @Autowired private Environment environment;
-    @Autowired private ApplicationContext applicationContext;
-    @Autowired private StoreService storeService;
-    @Autowired private ResourceService resourceService;
     @Autowired private LoggerProperties properties;
-    @Autowired private ThreadPool threadPool;
-
-    private String hostname;
-    private Store<LoggerEvent, Long> store;
-    private Store<AlertEvent, String> alertStore;
-
-    private final Collection<LoggerListener> listeners = new CopyOnWriteArrayList<>();
-    private final Map<String, AlertEvent> alerts = new ConcurrentHashMap<>();
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        initHostInformation();
-        initializeListeners();
-        initializeStores();
-        initializeAppenders();
-        initializeWorkers();
+        initSettings();
     }
 
     /**
@@ -77,8 +31,8 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
      * @param end   the end time
      * @return a non-null instance
      */
-    public Collection<AlertEvent> getAlerts(LocalDateTime start, LocalDateTime end) {
-        return alertStore.list(Query.<AlertEvent>builder().start(start).end(end).build());
+    public Collection<Alert> getAlerts(LocalDateTime start, LocalDateTime end) {
+        return getLoggerService().getAlerts(start, end);
     }
 
     /**
@@ -87,226 +41,53 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
      * @param id the alert identifier
      * @return the alert, null if it does not exist
      */
-    public AlertEvent getAlert(String id) {
-        requireNonNull(id);
-        return alertStore.find(id);
-    }
-
-    /**
-     * Registers a logger listener.
-     *
-     * @param loggerListener the listener
-     */
-    public void registerLoggerListener(LoggerListener loggerListener) {
-        requireNonNull(loggerListener);
-        if (!(loggerListener instanceof LoggerService)) {
-            LOGGER.info("Logger listener '{}'", ClassUtils.getName(loggerListener));
-            if (loggerListener instanceof ApplicationContextAware applicationContextAware) {
-                applicationContextAware.setApplicationContext(this.applicationContext);
-            }
-            listeners.add(loggerListener);
-        }
+    public Alert getAlert(String id) {
+        return getLoggerService().getAlert(id);
     }
 
     /**
      * Clears all alerts.
      */
     public long clearAlerts() {
-        long count = alertStore.clear();
-        alerts.clear();
-        return count;
+        return getLoggerService().clear();
     }
 
     /**
      * Acknowledge pending alerts.
      */
-    public int acknowledgeAlerts() {
-        AtomicInteger count = new AtomicInteger(0);
-        Query<AlertEvent> query = Query.<AlertEvent>builder().start(LocalDateTime.now().minusDays(7)).build();
-        alertStore.update(query, event -> {
-            event.setAcknowledged(true);
-            event.setPendingEventCount(0);
-            count.incrementAndGet();
-            return true;
-        });
-        alerts.clear();
-        return count.get();
+    public long acknowledgeAlerts() {
+        return getLoggerService().acknowledge();
     }
 
-    private void initializeListeners() {
-        ClassUtils.resolveProviderInstances(LoggerListener.class).forEach(this::registerLoggerListener);
-        getBeansOfType(LoggerListener.class).forEach(this::registerLoggerListener);
+    private void initSettings() {
+        LoggerSettings.Protocol protocol = EnumUtils.fromName(LoggerSettings.Protocol.class, properties.getGelf().getProtocol().name(), LoggerSettings.Protocol.UDP);
+        LoggerSettings.Gelf gelf = new LoggerSettings.Gelf()
+                .withHostname(properties.getGelf().getHostname())
+                .withPort(properties.getGelf().getPort())
+                .withFacility(properties.getGelf().getFacility())
+                .withProtocol(protocol)
+                .withOnlyAlerts(properties.getGelf().isOnlyAlerts());
+        protocol = EnumUtils.fromName(LoggerSettings.Protocol.class, properties.getSyslog().getProtocol().name(), LoggerSettings.Protocol.UDP);
+        LoggerSettings.Syslog syslog = new LoggerSettings.Syslog()
+                .withHostname(properties.getSyslog().getHostname())
+                .withPort(properties.getSyslog().getPort())
+                .withFacility(properties.getSyslog().getFacility())
+                .withProtocol(protocol)
+                .withOnlyAlerts(properties.getSyslog().isOnlyAlerts());
+        LoggerSettings settings = new LoggerSettings()
+                .withApplication(properties.getApplication())
+                .withProcess(properties.getProcess())
+                .withDebug(properties.isDebug())
+                .withDirectory(properties.getDirectory())
+                .withFileCount(properties.getFileCount())
+                .withFileSize(properties.getFileSize())
+                .withTrace(properties.isTrace())
+                .withGelf(gelf)
+                .withSyslog(syslog);
+        getLoggerService().setSettings(settings);
     }
 
-    private void initHostInformation() {
-        try {
-            hostname = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (UnknownHostException e) {
-            hostname = "localhost";
-        }
+    private net.microfalx.argus.api.LoggerService getLoggerService() {
+        return net.microfalx.argus.api.LoggerService.getInstance();
     }
-
-    private void initializeStores() {
-        Store.Options options = Store.Options.create(LoggerUtils.LOGGER_STORE, "Logger");
-        store = storeService.registerStore(options);
-        options = Store.Options.create(LoggerUtils.ALERT_STORE, "Alert");
-        alertStore = storeService.registerStore(options);
-    }
-
-    private void initializeAppenders() {
-        initializeApplicationAppender();
-        initializeGelfAppender();
-        initializeSyslogAppender();
-    }
-
-    private void initializeApplicationAppender() {
-        ApplicationAppenders appenders = new ApplicationAppenders(environment);
-        if (appenders.hasLogsDirectory()) {
-            LOGGER.info("Use logs directory: {}", appenders.getLogsDirectory().getAbsolutePath());
-        }
-        ch.qos.logback.classic.Logger logger = getRootLogger();
-        Iterator<Appender<ILoggingEvent>> appenderIterator = logger.iteratorForAppenders();
-        while (appenderIterator.hasNext()) {
-            Appender<ILoggingEvent> appender = appenderIterator.next();
-            if (appender instanceof RecorderAppender internalAppender) {
-                internalAppender.storage = this;
-                processQueuedLoggerEvents(internalAppender.pendingEvents);
-            }
-        }
-    }
-
-    private void initializeGelfAppender() {
-        LoggerProperties.Gelf gelf = properties.getGelf();
-        if (StringUtils.isEmpty(gelf.getHostname())) return;
-        LOGGER.info("Send logs using GELF to '{}'", gelf.toUri());
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        GelfLogbackAppender appender = new GelfLogbackAppender();
-        appender.setHost(gelf.getHostname());
-        appender.setPort(gelf.getPort());
-        appender.setIncludeFullMdc(true);
-        appender.setIncludeLocation(true);
-        appender.setExtractStackTrace("true");
-        appender.setOriginHost(hostname);
-        appender.setFacility(gelf.getFacility());
-        appender.setAdditionalFields("Application=" + defaultIfNull(properties.getApplication(), "Bootstrap"));
-        appender.setAdditionalFields("Process=" + defaultIfNull(properties.getProcess(), "Web"));
-        appender.setContext(loggerContext);
-        appender.setName("gelf");
-        appender.start();
-        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        logger.addAppender(appender);
-    }
-
-    private void initializeSyslogAppender() {
-        LoggerProperties.Syslog syslog = properties.getSyslog();
-        if (StringUtils.isEmpty(syslog.getHostname())) return;
-        LOGGER.info("Send logs using Syslog to '{}'", syslog.toUri());
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        SyslogAppender appender = new SyslogAppender();
-        appender.setSyslogHost(syslog.getHostname());
-        appender.setPort(syslog.getPort());
-        appender.setFacility(syslog.getFacility());
-        appender.setThrowableExcluded(true);
-        appender.setContext(loggerContext);
-        appender.setName("syslog");
-        appender.start();
-        ch.qos.logback.classic.Logger logger = loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        logger.addAppender(appender);
-    }
-
-
-    private void initializeWorkers() {
-        threadPool.submit(new AcknowledgeAlertsTask());
-        threadPool.submit(new ArchiveLogsTask());
-    }
-
-    @Override
-    public void onEvent(LoggerEvent event) {
-        requireNonNull(event);
-        try {
-            trackLogEvents(event);
-            processLogEvent(event);
-            processAlertEvent(event);
-            forwardLogEvent(event);
-        } catch (Throwable e) {
-            LoggerUtils.METRICS_FAILURE.increment(ExceptionUtils.getRootCauseName(e));
-        }
-    }
-
-    private void trackLogEvents(LoggerEvent event) {
-        METRICS_COUNTS_SEVERITY.count(event.getLevel().name());
-        if (event.getExceptionClassName() != null) METRICS_COUNTS_EXCEPTION.count(event.getExceptionClassName());
-    }
-
-    private void processQueuedLoggerEvents(Queue<LoggerEvent> events) {
-        for (; ; ) {
-            LoggerEvent event = events.poll();
-            if (event == null) break;
-            onEvent(event);
-        }
-    }
-
-    private void forwardLogEvent(LoggerEvent event) {
-        for (LoggerListener listener : listeners) {
-            try {
-                listener.onEvent(event);
-            } catch (Throwable e) {
-                String listenerClassName = ClassUtils.getName(listener);
-                LOGGER.debug("Failed to forward logging event to '{}', event {}", listenerClassName, event);
-                LoggerUtils.METRICS_FORWARD_FAILURE.increment(listenerClassName);
-            }
-        }
-    }
-
-    private void processLogEvent(LoggerEvent event) {
-        try {
-            store.add(event);
-        } catch (Throwable e) {
-            LOGGER.debug("Failed to store logging event '{}' to internal storage", event);
-            LoggerUtils.METRICS_EVENT_STORE_FAILURE.increment(ExceptionUtils.getRootCauseName(e));
-        }
-    }
-
-    private void processAlertEvent(LoggerEvent event) {
-        if (event.getLevel().isLowerSeverity(LoggerEvent.Level.WARN)) return;
-        AlertEvent alert = getAlert(event);
-        alert.update(event);
-        storeAlert(alert);
-    }
-
-    private void storeAlert(AlertEvent event) {
-        try {
-            alertStore.add(event);
-        } catch (Throwable e) {
-            LOGGER.debug("Failed to store alert event '{}' to internal storage", event);
-            LoggerUtils.METRICS_ALERT_STORE_FAILURE.increment(ExceptionUtils.getRootCauseName(e));
-        }
-    }
-
-    private AlertEvent getAlert(LoggerEvent event) {
-        return alerts.computeIfAbsent(event.getCorrelationId(), s -> {
-            AlertEvent alertEvent = alertStore.find(s);
-            if (alertEvent == null) alertEvent = AlertEvent.builder().id(s).build();
-            return alertEvent;
-        });
-    }
-
-    class AcknowledgeAlertsTask implements Runnable {
-
-        @Override
-        public void run() {
-            acknowledgeAlerts();
-        }
-    }
-
-    class ArchiveLogsTask implements Runnable {
-
-        @Override
-        public void run() {
-            Resource logs = resourceService.getPersisted("logs");
-            ApplicationAppenders appenders = new ApplicationAppenders(environment);
-            appenders.move(logs);
-        }
-    }
-
 }

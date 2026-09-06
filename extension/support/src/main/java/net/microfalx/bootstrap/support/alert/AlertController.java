@@ -1,10 +1,9 @@
 package net.microfalx.bootstrap.support.alert;
 
+import net.microfalx.argus.api.LoggerEvent;
 import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
-import net.microfalx.bootstrap.logger.AlertEvent;
-import net.microfalx.bootstrap.logger.LoggerEvent;
 import net.microfalx.bootstrap.logger.LoggerService;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Button;
@@ -33,7 +32,7 @@ public class AlertController extends DataSetController<Alert, String> {
     @GetMapping("acknowledge")
     @ResponseBody()
     public final JsonResponse<?> acknowledge() {
-        int count = loggerService.acknowledgeAlerts();
+        long count = loggerService.acknowledgeAlerts();
         return JsonResponse.success(count + " alerts have been acknowledged");
     }
 
@@ -48,7 +47,7 @@ public class AlertController extends DataSetController<Alert, String> {
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<Alert, Field<Alert>, String> dataSet, Model controllerModel, Alert dataSetModel) {
         super.beforeView(dataSet, controllerModel, dataSetModel);
         if (dataSetModel != null) {
-            AlertEvent alert = loggerService.getAlert(dataSetModel.getId());
+            net.microfalx.argus.api.Alert alert = loggerService.getAlert(dataSetModel.getId());
             controllerModel.addAttribute("alertClass", dataSetModel.getLevel() == LoggerEvent.Level.ERROR ? "alert-danger" : "alert-warning");
             if (alert != null) {
                 controllerModel.addAttribute("alert", alert);

@@ -1,5 +1,6 @@
 package net.microfalx.bootstrap.registry;
 
+import net.microfalx.registry.Registry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

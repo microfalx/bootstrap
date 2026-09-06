@@ -9,6 +9,7 @@ import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.container.WebContainerService;
 import net.microfalx.bootstrap.web.util.SecurityUtils;
+import net.microfalx.jvm.ObjectSizeEstimator;
 import net.microfalx.lang.*;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
@@ -16,8 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.EventListener;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -419,6 +423,7 @@ public final class ApplicationService implements InitializingBean {
         initTheme();
         initDomains();
         logApplication();
+        initSizes();
     }
 
     @EventListener(ApplicationStartedEvent.class)
@@ -510,7 +515,6 @@ public final class ApplicationService implements InitializingBean {
         FeatureContext featureContext = FeatureContext.get();
         if (assetBundle.getFeature() != null && !featureContext.isEnabled(assetBundle.getFeature())) return false;
         return shouldRender(assetBundle.isRequiresAuthentication());
-
     }
 
     private boolean shouldRender(Boolean requiresAuthentication) {
@@ -523,6 +527,13 @@ public final class ApplicationService implements InitializingBean {
         } else {
             return true;
         }
+    }
+
+    private void initSizes() {
+        ObjectSizeEstimator sizeEstimator = ObjectSizeEstimator.get();
+        sizeEstimator.registerShallowSize(ServletWebServerApplicationContext.class, 100);
+        sizeEstimator.registerShallowSize(GenericApplicationContext.class, 100);
+        sizeEstimator.registerShallowSize(AnnotationConfigApplicationContext.class, 100);
     }
 
     @Getter

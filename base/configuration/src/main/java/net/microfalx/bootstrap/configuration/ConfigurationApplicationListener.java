@@ -1,6 +1,6 @@
-package net.microfalx.bootstrap.logger;
+package net.microfalx.bootstrap.configuration;
 
-import net.microfalx.argus.api.LoggerService;
+import net.microfalx.configuration.ConfigurationService;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -9,8 +9,11 @@ import org.springframework.core.env.Environment;
 
 import static org.springframework.boot.context.logging.LoggingApplicationListener.DEFAULT_ORDER;
 
-public class LoggerApplicationListener implements ApplicationListener<SpringApplicationEvent>, Ordered {
-
+/**
+ * A Spring Boot application listener that initializes the configuration service when the
+ * application environment is prepared.
+ */
+public class ConfigurationApplicationListener implements ApplicationListener<SpringApplicationEvent>, Ordered {
     @Override
     public void onApplicationEvent(SpringApplicationEvent event) {
         if (event instanceof ApplicationEnvironmentPreparedEvent environmentPreparedEvent) {
@@ -20,10 +23,11 @@ public class LoggerApplicationListener implements ApplicationListener<SpringAppl
 
     @Override
     public int getOrder() {
-        return DEFAULT_ORDER + 2;
+        return DEFAULT_ORDER + 1;
     }
 
     private void initializeLoggers(Environment environment) {
-        LoggerService.getInstance().register();
+        EnvironmentConfigurationSource configurationSource = new EnvironmentConfigurationSource(environment);
+        ConfigurationService.getInstance().setSource(configurationSource);
     }
 }

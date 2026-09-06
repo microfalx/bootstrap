@@ -1,5 +1,7 @@
 package net.microfalx.bootstrap.support.report;
 
+import net.microfalx.argus.api.Issue;
+import net.microfalx.argus.report.Template;
 import net.microfalx.resource.Resource;
 
 import java.util.Collection;

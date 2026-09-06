@@ -1,9 +1,9 @@
 package net.microfalx.bootstrap.web.application;
 
-import net.microfalx.bootstrap.configuration.Configuration;
 import net.microfalx.bootstrap.configuration.ConfigurationService;
-import net.microfalx.bootstrap.configuration.Metadata;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.configuration.Configuration;
+import net.microfalx.configuration.Metadata;
 import net.microfalx.lang.SecretUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Provider;

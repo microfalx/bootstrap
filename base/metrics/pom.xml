@@ -57,6 +57,11 @@
         </dependency>
 
         <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.microfalx</groupId>
             <artifactId>metrics</artifactId>
         </dependency>

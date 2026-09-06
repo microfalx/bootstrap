@@ -45,6 +45,16 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.microfalx.registry</groupId>
+            <artifactId>registry-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.registry</groupId>
+            <artifactId>registry-jdbc</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

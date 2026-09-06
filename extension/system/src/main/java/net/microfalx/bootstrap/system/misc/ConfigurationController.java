@@ -2,12 +2,12 @@ package net.microfalx.bootstrap.system.misc;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.microfalx.bootstrap.configuration.Configuration;
 import net.microfalx.bootstrap.configuration.ConfigurationService;
-import net.microfalx.bootstrap.configuration.Metadata;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.web.controller.SystemPageController;
 import net.microfalx.bootstrap.web.util.JsonFormResponse;
+import net.microfalx.configuration.Configuration;
+import net.microfalx.configuration.Metadata;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.SecretUtils;
 import net.microfalx.lang.StringUtils;

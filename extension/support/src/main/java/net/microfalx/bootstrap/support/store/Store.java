@@ -5,9 +5,9 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
-import net.microfalx.bootstrap.store.StoreUtils;
 import net.microfalx.lang.annotation.*;
 import net.microfalx.metrics.Timer;
+import net.microfalx.store.core.StoreUtils;
 
 import java.time.Duration;
 
@@ -100,15 +100,15 @@ public class Store extends NamedIdentityAware<String> {
     @Visible(false)
     private String location;
 
-    public static Store from(net.microfalx.bootstrap.store.Store<?, ?> store) {
+    public static Store from(net.microfalx.store.api.Store<?, ?> store) {
         Store model = new Store();
         model.setId(store.getOptions().getId());
         model.setName(store.getOptions().getName());
-        model.setLocation(store.getDirectory().toURI().getPath());
-        model.setMemoryCount(store.count(net.microfalx.bootstrap.store.Store.Location.MEMORY));
-        model.setMemorySize(store.size(net.microfalx.bootstrap.store.Store.Location.MEMORY));
-        model.setDiskCount(store.count(net.microfalx.bootstrap.store.Store.Location.DISK));
-        model.setDiskSize(store.size(net.microfalx.bootstrap.store.Store.Location.DISK));
+        model.setLocation(store.getResource().toURI().getPath());
+        model.setMemoryCount(store.count(net.microfalx.store.api.Store.Location.MEMORY));
+        model.setMemorySize(store.size(net.microfalx.store.api.Store.Location.MEMORY));
+        model.setDiskCount(store.count(net.microfalx.store.api.Store.Location.DISK));
+        model.setDiskSize(store.size(net.microfalx.store.api.Store.Location.DISK));
         Timer timer = StoreUtils.getTimer(StoreUtils.ADD_ACTION, store);
         model.setAddCount(timer.getCount());
         model.setAddDuration(timer.getAverageDuration());

@@ -84,6 +84,10 @@
         <resource.version>1.0.4-SNAPSHOT</resource.version>
         <metrics.version>1.0.3-SNAPSHOT</metrics.version>
         <tracing.version>1.0.2-SNAPSHOT</tracing.version>
+        <store.version>1.0.0-SNAPSHOT</store.version>
+        <configuration.version>1.0.0-SNAPSHOT</configuration.version>
+        <registry.version>1.0.0-SNAPSHOT</registry.version>
+        <store.version>1.0.0-SNAPSHOT</store.version>
         <jvm.version>1.0.3-SNAPSHOT</jvm.version>
         <jdbcpool.version>1.0.2-SNAPSHOT</jdbcpool.version>
         <threadpool.version>1.0.2-SNAPSHOT</threadpool.version>
@@ -164,6 +168,28 @@
                 <version>${resource.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.registry</groupId>
+                <artifactId>registry-bom</artifactId>
+                <version>${registry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.store</groupId>
+                <artifactId>store-bom</artifactId>
+                <version>${store.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx</groupId>
+                <artifactId>configuration</artifactId>
+                <version>${configuration.version}</version>
             </dependency>
 
             <dependency>

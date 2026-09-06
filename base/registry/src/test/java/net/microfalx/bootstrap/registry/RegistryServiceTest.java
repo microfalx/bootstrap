@@ -1,15 +1,12 @@
 package net.microfalx.bootstrap.registry;
 
+import net.microfalx.registry.core.MemoryStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class RegistryServiceTest {
@@ -18,8 +15,7 @@ class RegistryServiceTest {
 
     @BeforeEach
     void setup() throws Exception {
-        List<Storage> storages = List.of(new MemoryStorage(), Mockito.mock(Storage.class));
-        registryService = new RegistryService(storages);
+        registryService = new RegistryService();
         registryService.afterPropertiesSet();
     }
 
@@ -35,7 +31,7 @@ class RegistryServiceTest {
 
     @Test
     void getRegistry() {
-        assertSame(registryService.getRegistry().getClass(), RegistryImpl.class);
+        assertNotNull(registryService.getRegistry());
     }
 
 }

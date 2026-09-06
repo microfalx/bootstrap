@@ -1,9 +1,9 @@
 package net.microfalx.bootstrap.test.answer;
 
-import net.microfalx.bootstrap.registry.Registry;
 import net.microfalx.bootstrap.registry.RegistryService;
-import net.microfalx.bootstrap.registry.Storage;
 import net.microfalx.bootstrap.test.annotation.AnswerFor;
+import net.microfalx.registry.Registry;
+import net.microfalx.registry.Storage;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.List;

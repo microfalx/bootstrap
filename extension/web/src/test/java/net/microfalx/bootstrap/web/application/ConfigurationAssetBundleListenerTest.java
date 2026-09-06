@@ -1,8 +1,8 @@
 package net.microfalx.bootstrap.web.application;
 
 import net.microfalx.bootstrap.configuration.ConfigurationService;
-import net.microfalx.bootstrap.registry.Registry;
 import net.microfalx.bootstrap.registry.RegistryService;
+import net.microfalx.registry.Registry;
 import net.microfalx.resource.Resource;
 import net.microfalx.threadpool.ThreadPool;
 import org.junit.jupiter.api.BeforeEach;

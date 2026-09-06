@@ -1,8 +1,8 @@
 package net.microfalx.bootstrap.test.answer;
 
-import net.microfalx.bootstrap.registry.Data;
-import net.microfalx.bootstrap.registry.Registry;
 import net.microfalx.bootstrap.test.ServiceUnitTestCase;
+import net.microfalx.registry.Data;
+import net.microfalx.registry.Registry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.InitializingBean;

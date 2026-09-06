@@ -2,9 +2,10 @@ package net.microfalx.bootstrap.jdbc.util;
 
 import net.microfalx.bootstrap.jdbc.support.Query;
 import net.microfalx.bootstrap.jdbc.support.QueryProvider;
-import net.microfalx.bootstrap.registry.AbstractStorage;
-import net.microfalx.bootstrap.registry.Node;
 import net.microfalx.lang.UriUtils;
+import net.microfalx.lang.annotation.SizeOf;
+import net.microfalx.registry.Node;
+import net.microfalx.registry.core.AbstractStorage;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -16,14 +17,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static net.microfalx.bootstrap.registry.RegistryUtils.*;
+import static net.microfalx.registry.core.RegistryUtils.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 public class JdbcStorage extends AbstractStorage {
 
     private final Map<String, Long> nodeIds = new ConcurrentHashMap<>();
-    private final QueryProvider queryProvider;
+    @SizeOf private final QueryProvider queryProvider;
 
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 

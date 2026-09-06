@@ -1,28 +1,18 @@
 package net.microfalx.bootstrap.registry;
 
 import lombok.extern.slf4j.Slf4j;
-import net.microfalx.lang.ClassUtils;
-import net.microfalx.lang.ObjectUtils;
+import net.microfalx.registry.Registry;
+import net.microfalx.registry.Storage;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static java.util.Collections.unmodifiableList;
-
 @Service
 @Slf4j
 public class RegistryService implements InitializingBean {
 
-    private final List<Storage> storages;
-
-    private volatile Storage storage;
     private Registry registry;
-
-    public RegistryService(List<Storage> storages) {
-        if (ObjectUtils.isEmpty(storages)) storages = List.of(new MemoryStorage());
-        this.storages = storages;
-    }
 
     /**
      * Returns the current registry.
@@ -39,7 +29,7 @@ public class RegistryService implements InitializingBean {
      * @return a non-null instance
      */
     public List<Storage> getStorages() {
-        return unmodifiableList(storages);
+        return getRegistryService().getStorages();
     }
 
     /**
@@ -48,26 +38,16 @@ public class RegistryService implements InitializingBean {
      * @return a non-null instance
      */
     public Storage getStorage() {
-        if (storage == null) selectStorage();
-        return storage;
+        return getRegistryService().getStorage();
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        registry = new RegistryImpl(this);
+        registry = getRegistryService().getRegistry();
     }
 
-    private synchronized void selectStorage() {
-        if (storage == null) {
-            for (Storage currentStorage : storages) {
-                if (!currentStorage.isEnabled()) {
-                    LOGGER.info("Registry storage {} is disabled, skip it", ClassUtils.getName(currentStorage));
-                    continue;
-                }
-                storage = currentStorage;
-                break;
-            }
-            LOGGER.info("Use registry storage {}", ClassUtils.getName(storage));
-        }
+    private net.microfalx.registry.RegistryService getRegistryService() {
+        return net.microfalx.registry.RegistryService.getInstance();
     }
+
 }

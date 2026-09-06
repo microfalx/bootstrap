@@ -1,42 +1,21 @@
 package net.microfalx.bootstrap.configuration;
 
-import lombok.Getter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import net.microfalx.bootstrap.registry.Data;
-import net.microfalx.bootstrap.registry.Registry;
 import net.microfalx.bootstrap.registry.RegistryService;
-import net.microfalx.lang.*;
-import net.microfalx.threadpool.ThreadPool;
+import net.microfalx.configuration.Configuration;
+import net.microfalx.configuration.ConfigurationEvent;
+import net.microfalx.configuration.Metadata;
+import net.microfalx.registry.Registry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.BindHandler;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static java.lang.System.currentTimeMillis;
-import static java.util.Collections.unmodifiableCollection;
-import static net.microfalx.bootstrap.configuration.ConfigurationUtils.REGISTRY_PATH;
-import static net.microfalx.bootstrap.configuration.ConfigurationUtils.ROOT_METADATA_ID;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
-import static net.microfalx.lang.StringUtils.*;
-import static net.microfalx.lang.TimeUtils.millisSince;
 
-@SuppressWarnings("unchecked")
 @Slf4j
 @Service
 public class ConfigurationService implements InitializingBean {
@@ -45,14 +24,8 @@ public class ConfigurationService implements InitializingBean {
 
     @Autowired private ApplicationEventPublisher eventPublisher;
     @Autowired private RegistryService registryService;
-    @Autowired private Environment environment;
-    @Autowired private ConversionService conversionService;
-    @Autowired private ThreadPool threadPool;
+    @Autowired private EnvironmentConfigurationSource configurationSource;
 
-    private Duration cacheExpiration = Duration.ofSeconds(5);
-    private Binder binder;
-    private final Map<String, Metadata> metadatas = new ConcurrentHashMap<>();
-    private final Map<String, CachedValue> cachedValues = new ConcurrentHashMap<>();
     private final Collection<ConfigurationListener> listeners = new CopyOnWriteArrayList<>();
 
     /**
@@ -90,15 +63,7 @@ public class ConfigurationService implements InitializingBean {
      * @return the value
      */
     public String getProperty(String key) {
-        requireNonNull(key);
-        try {
-            ConfigurationPropertyName name = ConfigurationPropertyName.adapt(key, '.');
-            Bindable<String> bindable = Bindable.of(String.class);
-            return binder.bindOrCreate(name, bindable, BindHandler.DEFAULT);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to get the property '{}', root cause: {}", key, getRootCauseDescription(e));
-            return null;
-        }
+        return configurationSource.getProperty(key);
     }
 
     /**
@@ -107,7 +72,7 @@ public class ConfigurationService implements InitializingBean {
      * @return a non-null instance
      */
     public Metadata getRootMetadata() {
-        return metadatas.get(toIdentifier(ROOT_METADATA_ID));
+        return getConfigurationService().getRootMetadata();
     }
 
     /**
@@ -117,13 +82,7 @@ public class ConfigurationService implements InitializingBean {
      * @return a non-null instance
      */
     public Metadata getMetadata(String key) {
-        requireNonNull(key);
-        Metadata metadata = this.metadatas.get(toIdentifier(key));
-        if (metadata == null) {
-            metadata = new Metadata(null, key, ConfigurationUtils.getTitle(key));
-            this.metadatas.put(metadata.getId(), metadata);
-        }
-        return metadata;
+        return getConfigurationService().getMetadata(key);
     }
 
     /**
@@ -133,16 +92,7 @@ public class ConfigurationService implements InitializingBean {
      * @return a non-null instance
      */
     public Collection<Metadata> getEntries(String prefix) {
-        if (isEmpty(prefix)) {
-            return unmodifiableCollection(this.metadatas.values());
-        } else {
-            String idPrefix = toIdentifier(prefix);
-            return this.metadatas.values().stream()
-                    .filter(Metadata::isLeaf)
-                    .filter(metadata -> metadata.getId().startsWith(idPrefix))
-                    .toList();
-        }
-
+        return getConfigurationService().getEntries(prefix);
     }
 
     /**
@@ -151,8 +101,7 @@ public class ConfigurationService implements InitializingBean {
      * @param metadata the metadata to register
      */
     public void registerMetadata(Metadata metadata) {
-        requireNonNull(metadata);
-        this.metadatas.put(metadata.getId(), metadata);
+        getConfigurationService().registerMetadata(metadata);
     }
 
     /**
@@ -161,142 +110,25 @@ public class ConfigurationService implements InitializingBean {
      * @param metadata the metadata of the group
      */
     public void notifyGroupChange(Metadata metadata) {
-        requireNonNull(metadata);
-        clearCache();
-        ConfigurationEvent event = new ConfigurationEvent(configuration, ConfigurationEvent.Type.GROUP, metadata.getFullKey());
-        fireConfigurationEvent(event);
+        getConfigurationService().notifyGroupChange(metadata);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        configuration = new SubsetImpl(this, null, EMPTY_STRING, "Root");
-        loadMetadata();
-        initBinder();
-        threadPool.execute(this::registerMetadata);
+        initConfiguration();
+        initForwardListener();
     }
 
     /**
      * Clears the caches associated with the configuration.
      */
     public void clearCache() {
-        cachedValues.clear();
+        getConfigurationService().clearCache();
     }
 
     void propertyChanged(Configuration configuration, String key, String previousValue, String currentValue) {
         ConfigurationEvent event = new ConfigurationEvent(configuration, ConfigurationEvent.Type.PROPERTY, key, previousValue, currentValue);
         fireConfigurationEvent(event);
-    }
-
-    <T> T convert(String key, Object value, Class<T> type) {
-        if (ObjectUtils.isEmpty(value) && type.isPrimitive()) {
-            value = createDefault(type);
-        }
-        if (value == null) return null;
-        if (type == Duration.class) {
-            return (T) TimeUtils.parseDuration(value.toString());
-        } else {
-            try {
-                return conversionService.convert(value, type);
-            } catch (Exception e) {
-                throw new ConfigurationException("Failed to convert value '" + value + "' to "
-                        + ClassUtils.getName(type) + " for key '" + key + "'", e);
-            }
-        }
-    }
-
-    String getFromRegistry(Configuration configuration, String key, String defaultValue) {
-        String value = getFromCache(key);
-        if (isEmpty(value)) {
-            String registryKey = getRegistryPath(key);
-            Optional<Data> data = getRegistry().get(registryKey);
-            if (data.isPresent()) {
-                value = ObjectUtils.toString(data.get().get());
-            } else {
-                value = getProperty(key);
-            }
-            cachedValues.put(key, new CachedValue(value));
-        }
-        if (SecretUtils.isSecret(key) && EncryptionUtils.isEncrypted(value)) {
-            value = EncryptionUtils.decrypt(value);
-        }
-        return defaultIfNull(value, defaultValue);
-    }
-
-    void setToRegistry(Configuration configuration, String key, Object value) {
-        String registryKey = getRegistryPath(key);
-        Data data = getRegistry().getOrCreate(registryKey);
-        String previousValue = ObjectUtils.toString(data.get());
-        data.set(value);
-        getRegistry().set(data);
-        propertyChanged(configuration, key, previousValue, ObjectUtils.toString(value));
-    }
-
-    private void initBinder() {
-        binder = Binder.get(environment);
-    }
-
-    private void loadMetadata() {
-        ConfigurationLoader loader = new ConfigurationLoader();
-        loader.load();
-        this.metadatas.putAll(loader.getMetadata());
-        LOGGER.info("Loaded {} configuration groups with {} items from {} resources", loader.getGroupCount(),
-                loader.getItemCount(), loader.getResourceCount());
-    }
-
-    private void registerMetadata() {
-        Registry registry = getRegistry();
-        int registered = 0;
-        for (Metadata metadata : metadatas.values()) {
-            try {
-                if (registerMetadata(registry, metadata)) registered++;
-            } catch (Exception e) {
-                LOGGER.atError().setCause(e).log("Failed to register metadata {} in registry", metadata.getFullKey());
-            }
-        }
-        LOGGER.info("Registered {} new configuration entries in registry", registered);
-    }
-
-    private boolean registerMetadata(Registry registry, Metadata metadata) {
-        Data data = registry.getOrCreate(getRegistryPath(metadata.getFullKey()));
-        if (data.exists() || !metadata.isLeaf()) return false;
-        boolean isSecret = SecretUtils.isSecret(metadata.getFullKey());
-        data.setAttribute("key", metadata.getFullKey());
-        data.setAttribute("name", metadata.getName());
-        String value = getProperty(metadata.getFullKey());
-        if (isEmpty(value)) value = metadata.getDefaultValue();
-        value = isSecret && !EncryptionUtils.isEncrypted(value) ? EncryptionUtils.encrypt(value) : value;
-        data.set(value);
-        registry.set(data);
-        return true;
-    }
-
-    private String getFromCache(String key) {
-        CachedValue cachedValue = cachedValues.get(key);
-        if (cachedValue != null && !cachedValue.isExpired(cacheExpiration)) {
-            return cachedValue.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    private String getRegistryPath(String key) {
-        String path = null;
-        Metadata metadata = getMetadata(key);
-        if (metadata != null) {
-            Metadata parentMetadata = metadata.getParent();
-            if (parentMetadata != null) {
-                path = toIdentifier(parentMetadata.getFullKey()) + "/" + toIdentifier(metadata.getKey());
-            }
-        }
-        if (path == null) {
-            int index = key.lastIndexOf('.');
-            if (index >= 0) {
-                path = toIdentifier(key.substring(0, index)) + "/" + toIdentifier(key.substring(index + 1));
-            } else {
-                path = toIdentifier(key);
-            }
-        }
-        return REGISTRY_PATH + "/" + path;
     }
 
     void fireConfigurationEvent(ConfigurationEvent event) {
@@ -306,42 +138,24 @@ public class ConfigurationService implements InitializingBean {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T createDefault(Class<?> type) {
-        Object value = defaultValues.get(type);
-        if (value != null) {
-            return (T) value;
-        } else {
-            return null;
+    private void initConfiguration() {
+        configuration = getConfigurationService().getConfiguration();
+    }
+
+    private void initForwardListener() {
+        getConfigurationService().addListener(new ForwardConfigurationListener());
+    }
+
+    private net.microfalx.configuration.ConfigurationService getConfigurationService() {
+        return net.microfalx.configuration.ConfigurationService.getInstance();
+    }
+
+    private class ForwardConfigurationListener implements net.microfalx.configuration.ConfigurationListener {
+
+        @Override
+        public void onEvent(ConfigurationEvent event) {
+            fireConfigurationEvent(event);
         }
     }
 
-    @Getter
-    @ToString
-    private static class CachedValue {
-
-        private final String value;
-        private final long created = currentTimeMillis();
-
-        private CachedValue(String value) {
-            this.value = value;
-        }
-
-        boolean isExpired(Duration expiration) {
-            return millisSince(created) > expiration.toMillis();
-        }
-    }
-
-    private static final Map<Class<?>, Object> defaultValues = new HashMap<>();
-
-    static {
-        defaultValues.put(boolean.class, false);
-        defaultValues.put(byte.class, (byte) 0);
-        defaultValues.put(short.class, (short) 0);
-        defaultValues.put(int.class, 0);
-        defaultValues.put(long.class, 0L);
-        defaultValues.put(float.class, 0f);
-        defaultValues.put(double.class, 0d);
-        defaultValues.put(Duration.class, Duration.ofSeconds(30));
-    }
 }
