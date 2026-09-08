@@ -16,7 +16,7 @@ class StoreServiceTest extends AbstractStoreTest {
 
     @Test
     void registerStore() {
-        storeService.registerStore(Store.Options.create("Test"));
+        storeService.register(Store.Options.create("Test"));
         assertNotNull(storeService.getStore("test"));
     }
 

@@ -414,7 +414,7 @@ public class DatabaseService implements InitializingBean {
                     .withDescription("The application database"));
             registerDataSource(newDataSource);
         }
-        statementStore = storeService.registerStore(Store.Options.create(joinNames("Database","Statement")));
+        statementStore = storeService.register(Store.Options.create(joinNames("Database","Statement")));
         coordinatorTaskExecutor.scheduleWithFixedDelay(new ValidateDatabases(), AVAILABILITY_INTERVAL.dividedBy(2));
     }
 

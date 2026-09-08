@@ -30,7 +30,7 @@ public class StoreService implements InitializingBean, DisposableBean {
      *
      * @param options the options
      */
-    public <T extends Identifiable<ID>, ID> Store<T, ID> registerStore(Store.Options options) {
+    public <T extends Identifiable<ID>, ID> Store<T, ID> register(Store.Options options) {
         requireNonNull(options);
         return getStoreService().register(options);
     }
