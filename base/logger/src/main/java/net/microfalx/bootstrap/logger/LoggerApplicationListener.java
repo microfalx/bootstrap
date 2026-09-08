@@ -1,6 +1,7 @@
 package net.microfalx.bootstrap.logger;
 
 import net.microfalx.argus.api.LoggerService;
+import net.microfalx.argus.api.LoggerSettings;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -24,6 +25,7 @@ public class LoggerApplicationListener implements ApplicationListener<SpringAppl
     }
 
     private void initializeLoggers(Environment environment) {
+        System.setProperty(LoggerSettings.DIRECTORY_PROP, environment.getProperty("bootstrap.logger.directory"));
         LoggerService.getInstance().register();
     }
 }

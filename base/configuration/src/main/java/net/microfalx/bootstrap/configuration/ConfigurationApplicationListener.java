@@ -14,6 +14,7 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
  * application environment is prepared.
  */
 public class ConfigurationApplicationListener implements ApplicationListener<SpringApplicationEvent>, Ordered {
+
     @Override
     public void onApplicationEvent(SpringApplicationEvent event) {
         if (event instanceof ApplicationEnvironmentPreparedEvent environmentPreparedEvent) {
