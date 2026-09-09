@@ -1,9 +1,12 @@
 package net.microfalx.bootstrap.logger;
 
+import lombok.extern.slf4j.Slf4j;
 import net.microfalx.argus.api.Alert;
 import net.microfalx.argus.api.LoggerSettings;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.lang.EnumUtils;
+import net.microfalx.lang.TextUtils;
+import net.microfalx.lang.service.ServiceLocator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
+@Slf4j
 @Service
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class LoggerService extends ApplicationContextSupport implements InitializingBean {
@@ -22,6 +26,7 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
     @Override
     public void afterPropertiesSet() throws Exception {
         initSettings();
+        dumpLogger();
     }
 
     /**
@@ -89,5 +94,12 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
 
     private net.microfalx.argus.api.LoggerService getLoggerService() {
         return net.microfalx.argus.api.LoggerService.getInstance();
+    }
+
+    private void dumpLogger() {
+        String log = ServiceLocator.getLog();
+        LOGGER.info("Pre-initialization logs:\n{}", TextUtils.insertSpacesWithBlock(log, 10));
+        // disable quiet mode, so that the logger service can log to the console
+        ServiceLocator.setQuiet(false);
     }
 }
