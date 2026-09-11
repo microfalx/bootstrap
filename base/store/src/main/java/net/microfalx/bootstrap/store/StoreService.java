@@ -1,7 +1,9 @@
 package net.microfalx.bootstrap.store;
 
+import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.lang.Identifiable;
+import net.microfalx.resource.Resource;
 import net.microfalx.store.api.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +20,22 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  * A service responsible for managing a collection of {@link net.microfalx.store.api.Store}.
  */
 @Service
+@Slf4j
 public class StoreService implements InitializingBean, DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StoreService.class);
 
     @Autowired(required = false) private StoreProperties properties = new StoreProperties();
     @Autowired private ResourceService resourceService;
+
+    /**
+     * Returns the directory where the stores will persist their data.
+     *
+     * @return a non-null instance
+     */
+    public Resource getDirectory() {
+        return getStoreService().getDirectory();
+    }
 
     /**
      * Registers a new store.
@@ -65,7 +77,7 @@ public class StoreService implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // nothing specific yet
+        initStoreDirectory();
     }
 
     @Override
@@ -75,6 +87,11 @@ public class StoreService implements InitializingBean, DisposableBean {
 
     private net.microfalx.store.api.StoreService getStoreService() {
         return net.microfalx.store.api.StoreService.getInstance();
+    }
+
+    private void initStoreDirectory() {
+        Resource resource = resourceService.getPersisted("store");
+        net.microfalx.store.api.StoreService.getInstance().setResource(resource);
     }
 
 }

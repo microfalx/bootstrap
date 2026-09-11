@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.microfalx.argus.api.Alert;
 import net.microfalx.argus.api.LoggerSettings;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.store.StoreService;
 import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.TextUtils;
 import net.microfalx.lang.service.ServiceLocator;
@@ -22,6 +23,7 @@ import java.util.Collection;
 public class LoggerService extends ApplicationContextSupport implements InitializingBean {
 
     @Autowired private LoggerProperties properties;
+    @Autowired private StoreService storeService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -98,6 +100,7 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
 
     private void dumpLogger() {
         String log = ServiceLocator.getLog();
+        LOGGER.debug("Logger storage is at {}", storeService.getDirectory());
         LOGGER.info("Pre-initialization logs:\n{}", TextUtils.insertSpacesWithBlock(log, 10));
         // disable quiet mode, so that the logger service can log to the console
         ServiceLocator.setQuiet(false);

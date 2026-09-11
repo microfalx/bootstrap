@@ -30,6 +30,8 @@ public class LoggerApplicationListener implements ApplicationListener<SpringAppl
         ServiceLocator.setQuiet(true);
         // redirects the property which controls the directory where the logs are stored to the property defined in the bootstrap configuration
         System.setProperty(LoggerSettings.DIRECTORY_PROP, environment.getProperty("bootstrap.logger.directory"));
+        // wait for the
+        System.setProperty(LoggerSettings.LAZY_PROP, "true");
         // register the logger service, which will initialize the loggers and redirect the logging to the logger service
         LoggerService.getInstance().register();
     }
