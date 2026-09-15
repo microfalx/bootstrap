@@ -17,11 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -531,9 +528,6 @@ public final class ApplicationService implements InitializingBean {
 
     private void initSizes() {
         ObjectSizeEstimator sizeEstimator = ObjectSizeEstimator.get();
-        sizeEstimator.registerShallowSize(ServletWebServerApplicationContext.class, 100);
-        sizeEstimator.registerShallowSize(GenericApplicationContext.class, 100);
-        sizeEstimator.registerShallowSize(AnnotationConfigApplicationContext.class, 100);
     }
 
     @Getter

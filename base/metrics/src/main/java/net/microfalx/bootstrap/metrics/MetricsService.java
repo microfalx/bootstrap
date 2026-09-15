@@ -13,10 +13,10 @@ import net.microfalx.metrics.Result;
 import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -118,7 +118,7 @@ public class MetricsService extends ApplicationContextSupport implements Initial
 
     private void registerObjectSizes() {
         ObjectSizeEstimator sizeEstimator = ObjectSizeEstimator.get();
-        sizeEstimator.registerShallowSize(GenericApplicationContext.class, 100);
-        sizeEstimator.registerShallowSize(StaticApplicationContext.class, 100);
+        sizeEstimator.registerShallowSizeOfSubclass(Environment.class, 500);
+        sizeEstimator.registerShallowSizeOfSubclass(ApplicationContext.class, 500);
     }
 }
