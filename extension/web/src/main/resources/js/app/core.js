@@ -500,15 +500,17 @@ Application.closeModal = function () {
  * Shows a dialog (modal) which contains the HTML fragment.
  *
  * @param {String} id the identifier of the modal (DOM element)
- * @param {String} content the contained of the modal (HTML, Text, etc)
+ * @param {String} [content] the contained of the modal (HTML, Text, etc)
  * @return {bootstrap.Modal} the modal
  */
 Application.loadModal = function (id, content) {
     let me = Application;
     Utils.requireNonNull(id, "id")
-    me.removeModal(id);
     let selector = '#' + id;
-    $(document.body).append(content);
+    if (Utils.isNotEmpty(content)) {
+        me.removeModal(id);
+        $(document.body).append(content);
+    }
     let modalElement = $(selector);
     if (modalElement.length === 0) {
         throw new Error("A modal with id '" + id + "' does not exist in the DOM");
