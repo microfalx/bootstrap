@@ -62,24 +62,40 @@ Application.Sse.start = function (path, callback, params, options) {
  * @param {boolean} enabled true if SSE is enabled, false otherwise
  */
 Application.Sse.setEnabled = function (enabled) {
+    let prevEnabled = this.isEnabled();
     Application.Sse.enabled = enabled;
+    if (!prevEnabled && this.isEnabled()) {
+        this.startDefault();
+    } else if (prevEnabled && !this.isEnabled()) {
+        // how do we stop?
+    }
 }
 
 /**
- * Returns whether SSE is enabled or not.
+ * Returns whether the SSE channel is enabled or not.
  *
  * @return {boolean} the true if SSE is enabled, false otherwise
  */
 Application.Sse.isEnabled = function () {
-    return Application.Sse.enabled !== false && Application.isAuthenticated();
+    return Application.Sse.enabled !== false;
 }
 
 /**
  * Initialize the SSE channel.
  */
 Application.Sse.initialize = function () {
-    Application.Sse.setEnabled(true);
-    if (!Application.isAuthenticated()) return;
+    Application.Sse.setEnabled(Application.isAuthenticated());
+    Logger.info("SSE connection is " + (Application.Sse.isEnabled() ? "enabled" : "disabled"));
+}
+
+/**
+ * Starts the SSE channel.
+ *
+ * The default SSE channel is started only if the current application has an authenticated context. However,
+ * the application can decide to start the SSE based on other conditions.
+ */
+Application.Sse.startDefault = function () {
+    Logger.info("Starting SSE connection");
     Application.Sse.start("/event/out", function (data, event) {
         let json = JSON.parse(data);
         let name = json.name;
