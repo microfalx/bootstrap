@@ -3,6 +3,7 @@ package net.microfalx.bootstrap.web.application;
 import lombok.Getter;
 import lombok.ToString;
 import net.microfalx.lang.Descriptable;
+import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
 import java.util.Objects;
@@ -17,7 +18,7 @@ import static net.microfalx.lang.StringUtils.defaultIfEmpty;
  */
 @Getter
 @ToString
-public final class Application implements Nameable, Descriptable {
+public final class Application implements Identifiable<String>, Nameable, Descriptable {
 
     String name;
     String description;
@@ -67,10 +68,29 @@ public final class Application implements Nameable, Descriptable {
     }
 
     /**
+     * Returns whether the current thread has an application associated with it.
+     *
+     * @return {@code true} if an application is associated, {@code false} otherwise
+     */
+    public static boolean has() {
+        return APPLICATION.get() != null;
+    }
+
+    /**
      * Removes the application instance associated with the current thread.
      */
     public static void clear() {
         APPLICATION.remove();
+    }
+
+    /**
+     * Returns the application instance identifier.
+     *
+     * @return a non-null instance
+     * @see #get()
+     */
+    public String getId() {
+        return get().orElse("na");
     }
 
     @Override

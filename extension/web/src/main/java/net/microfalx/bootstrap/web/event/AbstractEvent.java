@@ -26,6 +26,4 @@ public abstract class AbstractEvent implements Event {
         this.name = EventUtilities.getEventName(getClass());
     }
 
-
-
 }

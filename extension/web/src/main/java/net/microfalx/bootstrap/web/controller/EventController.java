@@ -83,7 +83,7 @@ public class EventController implements AnonymousController {
             if (event instanceof PingEvent) {
                 builder.comment("ping");
             } else {
-                builder.name(event.getName());
+                builder.comment("application");
             }
             try {
                 String data = objectMapper.writeValueAsString(event);
