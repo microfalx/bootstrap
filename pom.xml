@@ -31,7 +31,7 @@
     <parent>
         <groupId>net.microfalx</groupId>
         <artifactId>pom</artifactId>
-        <version>1.0.19</version>
+        <version>1.0.20</version>
     </parent>
 
     <name>Bootstrap</name>
@@ -78,7 +78,7 @@
     <inceptionYear>2023</inceptionYear>
 
     <properties>
-        <bom.version>1.0.21</bom.version>
+        <bom.version>1.0.23</bom.version>
 
         <lang.version>1.0.6-SNAPSHOT</lang.version>
         <resource.version>1.0.4-SNAPSHOT</resource.version>
