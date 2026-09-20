@@ -6,6 +6,7 @@ import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.FormatterUtils;
 import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.annotation.SizeOf;
 import net.microfalx.threadpool.ThreadPool;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.index.*;
@@ -48,6 +49,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
  * Provides indexing capabilities for full text search.
  */
 @Service
+@SizeOf(deepSize = SizeOf.UNESTIMATED_SIZE)
 public class IndexService implements InitializingBean, DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexService.class);

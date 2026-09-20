@@ -8,6 +8,7 @@ import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ConcurrencyUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
+import net.microfalx.lang.annotation.SizeOf;
 import net.microfalx.metrics.Matrix;
 import net.microfalx.metrics.Timer;
 import net.microfalx.threadpool.ThreadPool;
@@ -53,6 +54,68 @@ import static net.microfalx.lang.TimeUtils.*;
  * A service used to execute full text searches.
  */
 @Service
+@SizeOf(deepSize = SizeOf.UNESTIMATED_SIZE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public class SearchService implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);

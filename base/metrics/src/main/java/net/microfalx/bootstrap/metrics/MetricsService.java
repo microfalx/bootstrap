@@ -3,7 +3,6 @@ package net.microfalx.bootstrap.metrics;
 import lombok.CustomLog;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.resource.ResourceService;
-import net.microfalx.jvm.ObjectSizeEstimator;
 import net.microfalx.jvm.ServerMetrics;
 import net.microfalx.jvm.VirtualMachineMetrics;
 import net.microfalx.lang.ClassUtils;
@@ -13,10 +12,8 @@ import net.microfalx.metrics.Result;
 import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -77,7 +74,6 @@ public class MetricsService extends ApplicationContextSupport implements Initial
     public void afterPropertiesSet() throws Exception {
         initializeRepositories();
         initializeMetricsCollectors();
-        registerObjectSizes();
     }
 
     private Repository locateRepository(Query query) {
@@ -114,11 +110,5 @@ public class MetricsService extends ApplicationContextSupport implements Initial
         } catch (Exception e) {
             LOGGER.error("Failed to start server metrics", e);
         }
-    }
-
-    private void registerObjectSizes() {
-        ObjectSizeEstimator sizeEstimator = ObjectSizeEstimator.get();
-        sizeEstimator.registerShallowSizeOfSubclass(Environment.class, 500);
-        sizeEstimator.registerShallowSizeOfSubclass(ApplicationContext.class, 500);
     }
 }

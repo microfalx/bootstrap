@@ -79,6 +79,16 @@
             <artifactId>argus-report</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-spring-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-spring-actuator</artifactId>
+        </dependency>
+
         <!-- Testing -->
 
     </dependencies>
