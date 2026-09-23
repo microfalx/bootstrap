@@ -7,7 +7,7 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.store.StoreService;
 import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.TextUtils;
-import net.microfalx.lang.service.ServiceLocator;
+import net.microfalx.service.api.ServiceLocator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -99,10 +99,11 @@ public class LoggerService extends ApplicationContextSupport implements Initiali
     }
 
     private void dumpLogger() {
-        String log = ServiceLocator.getLog();
+        ServiceLocator serviceLocator = ServiceLocator.current();
+        String log = serviceLocator.getLog();
         LOGGER.debug("Logger storage is at {}", storeService.getDirectory());
         LOGGER.info("Pre-initialization logs:\n{}", TextUtils.insertSpacesWithBlock(log, 10));
         // disable quiet mode, so that the logger service can log to the console
-        ServiceLocator.setQuiet(false);
+        serviceLocator.setQuiet(false);
     }
 }

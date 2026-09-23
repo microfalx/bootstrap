@@ -2,7 +2,7 @@ package net.microfalx.bootstrap.logger;
 
 import net.microfalx.argus.api.LoggerService;
 import net.microfalx.argus.api.LoggerSettings;
-import net.microfalx.lang.service.ServiceLocator;
+import net.microfalx.service.api.ServiceLocator;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -27,7 +27,7 @@ public class LoggerApplicationListener implements ApplicationListener<SpringAppl
 
     private void initializeLoggers(Environment environment) {
         // do not log with SL4J until the logger service is initialized
-        ServiceLocator.setQuiet(true);
+        ServiceLocator.current().setQuiet(true);
         // redirects the property which controls the directory where the logs are stored to the property defined in the bootstrap configuration
         System.setProperty(LoggerSettings.DIRECTORY_PROP, environment.getProperty("bootstrap.logger.directory"));
         // wait for the
