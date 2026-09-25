@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-base-sba</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.microfalx.argus</groupId>
             <artifactId>argus-core</artifactId>
         </dependency>
