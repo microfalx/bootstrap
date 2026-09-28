@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 @ToString
 public class ApplicationProperties {
 
+    private String id;
+
     private String name = "Default";
 
     private String description;

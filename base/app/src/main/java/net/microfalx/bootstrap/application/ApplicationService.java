@@ -7,13 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
@@ -29,6 +33,7 @@ public final class ApplicationService implements InitializingBean {
 
     @Autowired(required = false) private ApplicationProperties applicationProperties = new ApplicationProperties();
 
+    @Autowired private ConfigurableEnvironment environment;
     private final Application application = new Application();
 
     /**
@@ -47,15 +52,32 @@ public final class ApplicationService implements InitializingBean {
         logApplication();
     }
 
+    @EventListener(ApplicationEnvironmentPreparedEvent.class)
+    public void onEnvironmentPrepared(ApplicationEnvironmentPreparedEvent event) {
+        ConfigurableEnvironment environment = event.getEnvironment();
+        registerApplicationProperties(environment);
+    }
+
     @EventListener(ApplicationStartedEvent.class)
     public void onStart(ApplicationStartedEvent event) {
         LOGGER.info("Started application, version: {}, build number: {}, build time: {}",
                 application.getVersion(), application.getBuildNumber(), application.getBuildTime());
     }
 
+    private void registerApplicationProperties(ConfigurableEnvironment environment) {
+        Map<String, Object> customProperties = Map.of(
+                "spring.application.name", application.getId(),
+                "spring.application.version", application.getVersion()
+        );
+        environment.getPropertySources().addFirst(
+                new MapPropertySource("applicationProperties", customProperties)
+        );
+    }
+
     private void initApplication() {
+        application.id = defaultIfEmpty(applicationProperties.getId(), toIdentifier(applicationProperties.getName()));
         application.name = applicationProperties.getName();
-        String defaultExecutable = toIdentifier(StringUtils.split(application.name, " "));
+        String defaultExecutable = defaultIfEmpty(applicationProperties.getId(), toIdentifier(StringUtils.split(application.name, " ")));
         application.executable = defaultIfEmpty(applicationProperties.getExecutable(), defaultExecutable);
         application.description = applicationProperties.getDescription();
         application.vendor = applicationProperties.getVendor();
@@ -66,6 +88,7 @@ public final class ApplicationService implements InitializingBean {
         System.setProperty("application.version", application.getVersion());
         System.setProperty("application.build.number", application.getBuildNumber());
         System.setProperty("application.build.time", application.getBuildTime());
+        registerApplicationProperties(environment);
     }
 
     private String getVersion() {

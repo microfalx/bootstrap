@@ -3,6 +3,7 @@ package net.microfalx.bootstrap.application;
 import lombok.Getter;
 import lombok.ToString;
 import net.microfalx.lang.Descriptable;
+import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
 import java.util.Objects;
@@ -13,8 +14,9 @@ import java.util.TimeZone;
  */
 @Getter
 @ToString
-public final class Application implements Nameable, Descriptable {
+public final class Application implements Identifiable<String>, Nameable, Descriptable {
 
+    String id;
     String name;
     String description;
     String vendor;
