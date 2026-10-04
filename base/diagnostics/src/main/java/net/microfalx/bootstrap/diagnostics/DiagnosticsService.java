@@ -60,7 +60,7 @@ public class DiagnosticsService implements InitializingBean {
     }
 
     private void initSettings() {
-        HealthSettings settings = new HealthSettings()
+        HealthSettings settings = getHealthService().getSettings()
                 .withHealthInterval(diagnosticsConfiguration.getHealthInterval())
                 .withScrapeInterval(diagnosticsConfiguration.getScrapeInterval());
         getHealthService().setSettings(settings);

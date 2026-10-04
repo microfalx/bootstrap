@@ -3,8 +3,6 @@ package net.microfalx.bootstrap.metrics;
 import lombok.CustomLog;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.resource.ResourceService;
-import net.microfalx.jvm.ServerMetrics;
-import net.microfalx.jvm.VirtualMachineMetrics;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.metrics.Query;
 import net.microfalx.metrics.Repository;
@@ -73,7 +71,6 @@ public class MetricsService extends ApplicationContextSupport implements Initial
     @Override
     public void afterPropertiesSet() throws Exception {
         initializeRepositories();
-        initializeMetricsCollectors();
     }
 
     private Repository locateRepository(Query query) {
@@ -97,18 +94,4 @@ public class MetricsService extends ApplicationContextSupport implements Initial
         LOGGER.info("Loaded {} metric repositories", repositories.size());
     }
 
-    private void initializeMetricsCollectors() {
-        LOGGER.debug("Initialize metrics collectors");
-        ThreadPool threadPool = getThreadPool();
-        try {
-            VirtualMachineMetrics.get().useDisk("jvm").setExecutor(threadPool).start();
-        } catch (Exception e) {
-            LOGGER.error("Failed to start JVM metrics", e);
-        }
-        try {
-            ServerMetrics.get().useDisk("server").setExecutor(threadPool).start();
-        } catch (Exception e) {
-            LOGGER.error("Failed to start server metrics", e);
-        }
-    }
 }

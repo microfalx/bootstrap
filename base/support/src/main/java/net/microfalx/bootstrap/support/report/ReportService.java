@@ -1,11 +1,15 @@
 package net.microfalx.bootstrap.support.report;
 
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.argus.api.HealthService;
+import net.microfalx.argus.api.HealthSettings;
 import net.microfalx.argus.api.Issue;
 import net.microfalx.argus.report.Fragment;
 import net.microfalx.argus.report.Report;
 import net.microfalx.bootstrap.application.Application;
 import net.microfalx.lang.ClassUtils;
+import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,28 @@ public class ReportService implements InitializingBean {
     @Autowired private ApplicationContext applicationContext;
 
     private final Collection<ReportingListener> listeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Returns the configuration controlling the reporting service.
+     *
+     * @return a non-null instance
+     */
+    public ReportConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Returns whether the given token is valid.
+     * <p>
+     * If the reporting service is not configured with a secret token, this method will always return {@code true}.
+     *
+     * @param token the key to be validated
+     * @return {@code true} if the key is valid, {@code false} otherwise
+     */
+    public boolean isValid(String token) {
+        if (StringUtils.isEmpty(configuration.getReportToken())) return true;
+        return ObjectUtils.equals(configuration.getReportToken(), token);
+    }
 
     /**
      * Returns registered providers.
@@ -98,6 +124,7 @@ public class ReportService implements InitializingBean {
         reload(true);
         initListeners();
         initApplicationContext();
+        initSettings();
     }
 
     @EventListener
@@ -147,6 +174,16 @@ public class ReportService implements InitializingBean {
                 applicationContextAware.setApplicationContext(applicationContext);
             }
         });
+    }
+
+    private void initSettings() {
+        HealthSettings settings = getHealthService().getSettings()
+                .withReportToken(configuration.getReportToken());
+        getHealthService().setSettings(settings);
+    }
+
+    private HealthService getHealthService() {
+        return HealthService.getInstance();
     }
 
 }

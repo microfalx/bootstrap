@@ -110,5 +110,12 @@ public interface ReportConfiguration extends ConfigurationListenerAware {
     @DefaultValue("Bootstrap")
     String getSystemName();
 
+    /**
+     * Returns the token used to protect the reports.
+     *
+     * @return the report token
+     */
+    @DefaultValue("UdDLyEprdTXZU6XHJCGg")
+    String getReportToken();
 
 }
