@@ -374,6 +374,9 @@ Application.getHashUrl = function () {
 Application.saveFormWithAction = function (selector, params, options) {
     Utils.requireNonNull(selector);
     let form = $(selector);
+    if (form.length === 0) {
+        throw new Error("No form matching the selector '" + selector + "'");
+    }
     let path = form.attr('action');
     if (Utils.isEmpty(path)) throw new Error("Path or Form.action attribute must be specified");
     this.saveForm(form, path, params, options);
@@ -396,7 +399,10 @@ Application.saveForm = function (selector, path, params, options) {
     let url = this.getUri(path, params, {params: false, self: options.self});
     let headers = this.getHeaders();
     let before = options.before;
+    let after = options.after;
     let success = options.success;
+    let invalid = options.invalid;
+    let error = options.error;
     form.ajaxSubmit({
         url: url,
         type: 'POST',
@@ -412,9 +418,12 @@ Application.saveForm = function (selector, path, params, options) {
             me.showErrorAlert("Submit", message);
             message += ", error: " + errorThrown;
             Logger.error(message);
+            if (error) error.apply(this, [textStatus, jqXHR, errorThrown]);
+            if (after) after.apply(this, [textStatus, jqXHR, errorThrown]);
         },
         success: function (data, textStatus, jqXHR) {
-            Logger.info("Form was submitted successfully, response " + Utils.toString(data));
+            if (after) after.apply(this, [textStatus, jqXHR, data]);
+            Logger.info("Form was submitted successfully, server response " + Utils.toString(data));
             if (data.success) {
                 if (success) success.apply(this, [data]);
             } else {
@@ -426,10 +435,11 @@ Application.saveForm = function (selector, path, params, options) {
                     me.showErrorAlert("Validation", "Form cannot be submitted with invalid values");
                     for (let field in errors) {
                         let message = errors[field];
-                        let formField = el.find("input[name='" + field + "']");
+                        let formField = form.find("input[name='" + field + "']");
                         formField.addClass("is-invalid");
                         me.showTooltip(formField, message);
                     }
+                    if (invalid) invalid.apply(this, [textStatus, jqXHR, data]);
                 }
             }
         }
