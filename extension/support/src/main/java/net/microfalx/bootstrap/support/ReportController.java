@@ -11,6 +11,7 @@ import net.microfalx.bootstrap.web.application.annotation.SystemTheme;
 import net.microfalx.bootstrap.web.controller.AnonymousController;
 import net.microfalx.bootstrap.web.controller.PageController;
 import net.microfalx.bootstrap.web.util.ResponseEntityUtils;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.resource.Resource;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Controller
 @RequestMapping(value = "/support/report")
@@ -42,10 +44,13 @@ public class ReportController extends PageController implements AnonymousControl
     @GetMapping(value = "", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<StreamingResponseBody> home(@RequestParam(value = "dynamic", defaultValue = "true") boolean dynamic,
                                                       @RequestParam(value = "secure", defaultValue = "false") boolean secure,
-                                                      @RequestParam(value = "token", defaultValue = "false") String token) {
+                                                      @RequestParam(value = "token", required = false) String token,
+                                                      @RequestParam(value = "theme", required = false) String theme,
+                                                      @RequestParam(value = "navTheme", required = false) String navTheme) {
         try {
             checkToken(token);
             Report report = createReport().setDynamic(dynamic).setSecure(secure);
+            updateTheme(report, theme, navTheme);
             Resource reportBody = Resource.temporary("report", "html");
             report.render(reportBody);
             return streamReport(report, reportBody);
@@ -69,6 +74,11 @@ public class ReportController extends PageController implements AnonymousControl
         } catch (Exception e) {
             return streamError("Error generating report fragment '" + id + "'", e);
         }
+    }
+
+    private void updateTheme(Report report, String theme, String navTheme) {
+        report.setTheme(getTheme(theme, report.getTheme()));
+        report.setNavigationTheme(getTheme(navTheme, report.getNavigationTheme()));
     }
 
     private ResponseEntity<StreamingResponseBody> streamReport(Report report, Resource reportBody) {
@@ -112,5 +122,13 @@ public class ReportController extends PageController implements AnonymousControl
         Theme theme = applicationService.getCurrentTheme();
         report.setTheme(theme.isLight() ? Report.Theme.LIGHT : Report.Theme.DARK);
         return report;
+    }
+
+    private Report.Theme getTheme(String theme, Report.Theme defaultTheme) {
+        if (isNotEmpty(theme)) {
+            return EnumUtils.fromName(Report.Theme.class, theme, defaultTheme);
+        } else {
+            return defaultTheme;
+        }
     }
 }
