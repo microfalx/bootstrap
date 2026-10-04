@@ -39,7 +39,7 @@ public class JdbcStorage extends AbstractStorage {
         if (recursive) {
             query = queryProvider.withResource("registry.get_children.sql").parameter(1, normalizedPath + "/%");
         } else {
-            query = queryProvider.withResource("registry.get_direct_children.sql").parameter(1, getParentId(normalizedPath));
+            query = queryProvider.withResource("registry.get_direct_children.sql").parameter(1, getId(normalizedPath));
         }
         try {
             return query.selectMany((rs, rowNum) -> {
@@ -125,7 +125,7 @@ public class JdbcStorage extends AbstractStorage {
     }
 
     private boolean hasChildren(String path) {
-        Long parentId = getParentId(path);
+        Long parentId = getId(path);
         if (parentId != null) {
             return queryProvider.withResource("registry.count_children.sql")
                     .parameter(1, parentId)
