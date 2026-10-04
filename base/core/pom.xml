@@ -64,6 +64,11 @@
             <artifactId>threadpool</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-api</artifactId>
+        </dependency>
+
         <!-- Spring -->
 
         <dependency>

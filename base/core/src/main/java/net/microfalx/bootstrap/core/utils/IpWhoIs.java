@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.IOUtils;
+import net.microfalx.lang.NetworkUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
 
@@ -93,8 +94,7 @@ public class IpWhoIs implements GeoLocation {
     }
 
     private void resolve() {
-        // || CachedAddress.isLocalNetwork(ip)
-        if (CachedAddress.isLocalHost(ip)) return;
+        if (NetworkUtils.isLocalHost(ip) || NetworkUtils.isLocalNetwork(ip)) return;
         try {
             URL url = URI.create(URL + "/" + ip).toURL();
             String json = IOUtils.getInputStreamAsString(url.openStream());
