@@ -3,9 +3,8 @@ package net.microfalx.bootstrap.security.provisioning;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.restapi.RestApiAccessDeniedHandler;
 import net.microfalx.bootstrap.restapi.RestApiAuthenticationEntryPoint;
+import net.microfalx.bootstrap.web.util.HttpServletUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -30,30 +29,28 @@ public class SecurityConfiguration {
     @Autowired
     private SecurityProperties securityProperties;
 
-    @Bean
-    @Order(5)
-    public SecurityFilterChain healthChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.securityMatcher(EndpointRequest.to(HealthEndpoint.class));
-        httpSecurity.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-        return httpSecurity.build();
-    }
 
     @Bean
     @Order(10)
     public SecurityFilterChain webChain(HttpSecurity httpSecurity, RememberMeServices rememberMeServices) throws Exception {
         if (securityProperties.isEnabled()) {
             httpSecurity.securityMatcher(addMatchAll("/"));
-            httpSecurity.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            httpSecurity.authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/actuator/**").access((authentication, context) -> {
+                        boolean isLocal = HttpServletUtils.isClientLocal(context.getRequest());
+                        return new org.springframework.security.authorization.AuthorizationDecision(isLocal);
+                    })
+                    .anyRequest().permitAll()
+            );
             updateLogin(httpSecurity);
             updateRememberMe(httpSecurity, rememberMeServices);
             updateCommon(httpSecurity);
             updateExceptionHandling(httpSecurity);
-            return httpSecurity.build();
         } else {
             httpSecurity.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
             updateCommon(httpSecurity);
-            return httpSecurity.build();
         }
+        return httpSecurity.build();
     }
 
     private void updateCommon(HttpSecurity httpSecurity) throws Exception {
