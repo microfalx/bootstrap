@@ -403,6 +403,10 @@ Application.saveForm = function (selector, path, params, options) {
     let success = options.success;
     let invalid = options.invalid;
     let error = options.error;
+    let clearFields = function() {
+        form.find('input').removeClass('is-invalid').tooltip("dispose");
+    }
+    clearFields();
     form.ajaxSubmit({
         url: url,
         type: 'POST',
@@ -427,7 +431,7 @@ Application.saveForm = function (selector, path, params, options) {
             if (data.success) {
                 if (success) success.apply(this, [data]);
             } else {
-                form.find('input').removeClass('is-invalid').tooltip("dispose");
+                clearFields();
                 let errors = data.errors || {};
                 if (Utils.isNotEmpty(data.message)) {
                     me.showErrorAlert("Validation", data.message);
