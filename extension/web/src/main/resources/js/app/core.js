@@ -403,7 +403,7 @@ Application.saveForm = function (selector, path, params, options) {
     let success = options.success;
     let invalid = options.invalid;
     let error = options.error;
-    let clearFields = function() {
+    let clearFields = function () {
         form.find('input').removeClass('is-invalid').tooltip("dispose");
     }
     clearFields();
@@ -453,18 +453,20 @@ Application.saveForm = function (selector, path, params, options) {
 /**
  * Updates for data before it is sent to the server.
  *
- * @param {JQuery} el the form element
+ * @param {JQuery} form the form element
  * @param {Array} data an array with object, one property "name" with the value
  */
-Application.updateFormFields = function (el, data) {
+Application.updateFormFields = function (form, data) {
     let fieldNames = {};
     for (let tuple of data) {
         fieldNames[tuple["name"]] = true;
     }
-    el.find('input').each(function (index) {
-        if ($(this).attr("type") === "checkbox") {
-            let name = $(this).attr("name");
-            if (!fieldNames[name]) {
+    form.find('input').each(function (index) {
+        let field = $(this);
+        if (field.attr("type") === "checkbox") {
+            let name = field.attr("name");
+            let fieldCount = form.find('[name="' + name + '"]').length;
+            if (!fieldNames[name] && fieldCount === 1) {
                 data.push({name: name, value: 'off'});
             }
         }
