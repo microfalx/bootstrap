@@ -2,10 +2,13 @@ package net.microfalx.bootstrap.web.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.bootstrap.web.application.ApplicationUtils;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.threadpool.ThreadPool;
+import org.slf4j.MDC;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -42,7 +45,8 @@ public class EventService implements InitializingBean {
     private final Map<String, Class<? extends Event>> eventTypes = new ConcurrentHashMap<>();
     private EventSerde eventSerde;
 
-    @Autowired private ApplicationContext applicationContext;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private ThreadPool threadPool;
 
@@ -120,6 +124,9 @@ public class EventService implements InitializingBean {
         if (StringUtils.isEmpty(application)) {
             throw new EventException("Event application is not set for event " + event);
         } else {
+            Level level = event instanceof PingEvent ? Level.TRACE : Level.DEBUG;
+            MDC.put("AppId", ApplicationUtils.getShortId(application));
+            LOGGER.atLevel(level).log("Publish event {} for application {}", event, application);
             getQueue(application).add(event);
         }
     }
@@ -214,7 +221,6 @@ public class EventService implements InitializingBean {
             eventSerde = new EventSerde();
         }
     }
-
 
     private void destroyApplication(String id) {
         events.remove(id);

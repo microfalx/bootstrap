@@ -95,7 +95,7 @@ Application.Sse.initialize = function () {
  * the application can decide to start the SSE based on other conditions.
  */
 Application.Sse.startDefault = function () {
-    Logger.info("Starting SSE connection");
+    Logger.info("Starting SSE connection, application: "+ Application.getId());
     Application.Sse.start("/event/out", function (data, event) {
         let json = JSON.parse(data);
         let name = json.name;

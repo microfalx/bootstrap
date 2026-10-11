@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.utils.Failure;
+import net.microfalx.bootstrap.web.application.Application;
+import net.microfalx.bootstrap.web.application.ApplicationUtils;
 import net.microfalx.bootstrap.web.event.*;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.threadpool.ThreadPool;
+import org.slf4j.MDC;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
@@ -30,26 +34,31 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @Slf4j
 public class EventController implements AnonymousController {
 
-    @Autowired private EventService eventService;
-
-    private String application;
+    @Autowired
+    private EventService eventService;
 
     @ModelAttribute
     public void setHeaders(HttpServletRequest request) {
-        application = request.getHeader("X-Application-Id");
+        String application = request.getHeader("X-Application-Id");
         if (isEmpty(application)) {
             application = request.getParameter("applicationId");
         }
         if (isEmpty(application)) {
-            throw new EventException("X-Application-Id header is not set");
+            throw new EventException("Application identifier (X-Application-Id header or request parameter) is not set");
         }
+        Application.set(application);
     }
 
     @GetMapping(path = "/out", produces = TEXT_EVENT_STREAM_VALUE)
     public SseEmitter outEvent() {
+        String application = Application.current();
+        if (isEmpty(application)) {
+            throw new EventException("Application identifier is not available for SSE connection");
+        }
         SseEmitter emitter = new SseEmitter(0L);
         ThreadPool threadPool = eventService.getThreadPool();
         threadPool.execute(new EventsTask(emitter, application, eventService));
+        LOGGER.debug("Start SEE emitter for application {}", application);
         return emitter;
     }
 
@@ -79,6 +88,9 @@ public class EventController implements AnonymousController {
         }
 
         private void sendEvent(Event event) {
+            MDC.put("AppId", ApplicationUtils.getShortId(application));
+            Level level = event instanceof PingEvent ? Level.TRACE : Level.DEBUG;
+            LOGGER.atLevel(level).log("Send event {} for application {}", event, event.getApplication());
             SseEmitter.SseEventBuilder builder = SseEmitter.event().id(event.getId());
             if (event instanceof PingEvent) {
                 builder.comment("ping");
