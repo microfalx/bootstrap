@@ -46,11 +46,12 @@ public class ReportController extends PageController implements AnonymousControl
                                                       @RequestParam(value = "secure", defaultValue = "false") boolean secure,
                                                       @RequestParam(value = "token", required = false) String token,
                                                       @RequestParam(value = "theme", required = false) String theme,
-                                                      @RequestParam(value = "navTheme", required = false) String navTheme) {
+                                                      @RequestParam(value = "navTheme", required = false) String navTheme,
+                                                      @RequestParam(value = "navCollapsed", required = false) boolean navCollapsed) {
         try {
             checkToken(token);
             Report report = createReport().setDynamic(dynamic).setSecure(secure);
-            updateTheme(report, theme, navTheme);
+            updateTheme(report, theme, navTheme, navCollapsed);
             Resource reportBody = Resource.temporary("report", "html");
             report.render(reportBody);
             return streamReport(report, reportBody);
@@ -76,9 +77,11 @@ public class ReportController extends PageController implements AnonymousControl
         }
     }
 
-    private void updateTheme(Report report, String theme, String navTheme) {
+    private void updateTheme(Report report, String theme, String navTheme, boolean navCollapsed) {
         report.setTheme(getTheme(theme, report.getTheme()));
-        report.setNavigationTheme(getTheme(navTheme, report.getNavigationTheme()));
+        Report.Navigation navigation = new Report.Navigation(getTheme(navTheme, report.getNavigation().getTheme()))
+                .withCollapsed(navCollapsed);
+        report.setNavigation(navigation);
     }
 
     private ResponseEntity<StreamingResponseBody> streamReport(Report report, Resource reportBody) {
