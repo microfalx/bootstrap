@@ -136,18 +136,20 @@ Application.showAlert = function (title, message, type) {
  *
  * @param {Object|String} element the element reference
  * @param {String} message the message to display
+ * @param {Object} [options] the options used to display the tooltip
  */
-Application.showTooltip = function (element, message) {
+Application.showTooltip = function (element, message, options) {
     if ($(element).length === 0) {
         Logger.error("An element with identifier '" + element + "' does not exist");
     } else {
-        let tooltip = new bootstrap.Tooltip($(element), {
-            title: message,
+        options = Utils.applyIf(options || {}, {
             placement: 'right',
             trigger: 'manual',
             delay: {"show": 0, "hide": 2000},
             customClass: 'alert-danger'
         });
+        options.title = message;
+        let tooltip = new bootstrap.Tooltip($(element), options);
         tooltip.show();
     }
 }
