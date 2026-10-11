@@ -24,7 +24,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
@@ -261,14 +260,7 @@ public class CachedAddress implements Identifiable<String>, Nameable, Timestampa
         return address;
     }
 
-    static {
-        try {
-            anyAddress = InetAddress.getByName("0.0.0.0");
-        } catch (UnknownHostException e) {
-            System.out.println("Failed to initialize ANY address, root cause: " + getRootCauseDescription(e));
-            anyAddress = InetAddress.getLoopbackAddress();
-        }
-    }
+
 
     private static class ResolveCanonicalNameTask implements Runnable {
 
