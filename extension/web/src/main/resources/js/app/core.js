@@ -441,7 +441,9 @@ Application.saveForm = function (selector, path, params, options) {
                         let message = errors[field];
                         let formField = form.find("input[name='" + field + "']");
                         formField.addClass("is-invalid");
-                        me.showTooltip(formField, message);
+                        me.showTooltip(formField, message, {
+                            placement: 'top',
+                        });
                     }
                     if (invalid) invalid.apply(this, [textStatus, jqXHR, data]);
                 }
@@ -453,10 +455,11 @@ Application.saveForm = function (selector, path, params, options) {
 /**
  * Updates for data before it is sent to the server.
  *
- * @param {JQuery} form the form element
+ * @param {JQuery|Element|String} form the form element
  * @param {Array} data an array with object, one property "name" with the value
  */
 Application.updateFormFields = function (form, data) {
+    form = $(form);
     let fieldNames = {};
     for (let tuple of data) {
         fieldNames[tuple["name"]] = true;
@@ -533,7 +536,7 @@ Application.loadModal = function (id, content) {
     }
     // remove the DOM element after the hide transition finishes
     modalElement.on('hidden.bs.modal', function () {
-        me.removeModal(id);
+        if (Utils.isNotEmpty(content)) me.removeModal(id);
     })
     let modal = new bootstrap.Modal(selector, {});
     modal.show();
@@ -554,6 +557,7 @@ Application.removeModal = function (id) {
 
 /**
  * Registers a modal, which is used to validate if the user clicks outside the popup.
+ *
  * @param {bootstrap.Modal} modal the modal instance
  */
 Application.registerModal = function (id, modal) {
