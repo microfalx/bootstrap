@@ -2,6 +2,7 @@ package net.microfalx.bootstrap.web.controller;
 
 import net.microfalx.bootstrap.web.application.ApplicationException;
 import net.microfalx.bootstrap.web.application.Asset;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
@@ -32,6 +33,18 @@ public class AssetUtils {
      * @return the entity
      */
     public static ResponseEntity<Object> getResource(String path, Asset.Type type) {
+        return getResource(path, type, null);
+    }
+
+    /**
+     * Returns a response for a static resource.
+     *
+     * @param path        the path
+     * @param type        the type
+     * @param defaultPath the default path, if the resource at path does not exists (can be null)
+     * @return the entity
+     */
+    public static ResponseEntity<Object> getResource(String path, Asset.Type type, String defaultPath) {
         String typePath = switch (type) {
             case IMAGE -> "image";
             case FONT -> "font";
@@ -39,7 +52,12 @@ public class AssetUtils {
         };
         try {
             Resource content = ClassPathResource.file(typePath + "/" + removeStartSlash(path));
-            if (!content.exists()) return ResponseEntity.notFound().build();
+            if (!content.exists() && StringUtils.isNotEmpty(defaultPath)) {
+                content = ClassPathResource.file(typePath + "/" + removeStartSlash(defaultPath));
+            }
+            if (!content.exists()) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(getContentType(type)))
                     .eTag(content.toHash()).cacheControl(CacheControl.maxAge(Duration.ofMinutes(15)))
                     .body(new InputStreamResource(content.getInputStream()));
