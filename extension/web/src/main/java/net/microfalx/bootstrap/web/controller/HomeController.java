@@ -19,7 +19,7 @@ public class HomeController extends DashboardController {
     @GetMapping("favicon.ico")
     @PermitAll
     public ResponseEntity<Object> favicon() {
-        return AssetUtils.getResource("favicon.ico", Asset.Type.IMAGE);
+        return AssetUtils.getResource("favicon.ico", Asset.Type.IMAGE, "favicon_default.ico");
     }
 
     @Override
