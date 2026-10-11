@@ -1,6 +1,6 @@
 package net.microfalx.bootstrap.cli.util;
 
-import net.microfalx.lang.Logger;
+import net.microfalx.lang.Glyph;
 import net.microfalx.threadpool.ThreadPool;
 import picocli.CommandLine;
 
@@ -217,32 +217,32 @@ public final class Console {
     }
 
     public Console printCheck() {
-        print(Logger.Glyph.CHECK_HEAVY).print(SPACE);
+        print(Glyph.CHECK_HEAVY).print(SPACE);
         return this;
     }
 
     public Console printCross() {
-        print(Logger.Glyph.CROSS_MARK).print(SPACE);
+        print(Glyph.CROSS_MARK).print(SPACE);
         return this;
     }
 
     public Console printBullet() {
-        print(Logger.Glyph.BULLET).print(SPACE);
+        print(Glyph.BULLET).print(SPACE);
         return this;
     }
 
     public Console printTriangle() {
-        print(Logger.Glyph.WARNING).print(SPACE);
+        print(Glyph.WARNING).print(SPACE);
         return this;
     }
 
     public Console printRightArrow() {
-        print(Logger.Glyph.ARROW_RIGHT).print(SPACE);
+        print(Glyph.ARROW_RIGHT).print(SPACE);
         return this;
     }
 
     public Console printLeftArrow() {
-        print(Logger.Glyph.ARROW_LEFT).print(SPACE);
+        print(Glyph.ARROW_LEFT).print(SPACE);
         return this;
     }
 
