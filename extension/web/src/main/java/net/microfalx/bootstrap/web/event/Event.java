@@ -16,6 +16,15 @@ import net.microfalx.lang.Nameable;
  * constructor.
  * <p>
  * Each instance of the event is associated with the current application identifier.
+ * <p>
+ * <b>Warning:</b> the application identifier is captured when the event is created, from the application bound to
+ * the current thread (see {@link net.microfalx.bootstrap.web.application.Application#current()}). The application is
+ * bound only to threads which handle web container requests. If events are created outside the web container
+ * requests (thread pools, scheduled tasks, asynchronous callbacks, etc.), the application must be assigned manually
+ * with {@code setApplication(String)}, using an identifier captured while processing the request
+ * (for example {@code Application.current()} called before the work is handed off to another thread). Otherwise, the
+ * event is associated with no application ({@code na}) or with a stale application left on a reused thread, and the
+ * event never reaches the intended page.
  */
 public interface Event extends Identifiable<String>, Nameable {
 
