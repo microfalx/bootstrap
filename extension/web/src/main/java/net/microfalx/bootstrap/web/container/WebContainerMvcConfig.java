@@ -8,7 +8,7 @@ import net.microfalx.metrics.Metrics;
 import net.microfalx.metrics.Summary;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -26,7 +26,7 @@ public class WebContainerMvcConfig implements WebMvcConfigurer {
     private static final Metrics METRICS = Metrics.of("Web Container").withGroup("Requests");
 
     @Order
-    private static class RequestInterceptor implements HandlerInterceptor {
+    private static class RequestInterceptor implements AsyncHandlerInterceptor {
 
         private final PathFilter pathFilter = new PathFilter();
 
@@ -44,11 +44,14 @@ public class WebContainerMvcConfig implements WebMvcConfigurer {
         }
 
         @Override
+        public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+            clear();
+        }
+
+        @Override
         public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
             if (pathFilter.shouldInclude(request)) recordTime(request);
-            FormatterUtils.setTimeZone(null);
-            FormatterUtils.setLocale(null);
-            WebContainerRequest.REQUEST.remove();
+            clear();
         }
 
         private void recordTime(HttpServletRequest request) {
@@ -56,6 +59,12 @@ public class WebContainerMvcConfig implements WebMvcConfigurer {
             long duration = System.nanoTime() - START_TIME.get();
             Summary summary = METRICS.getSummary(matchedPattern);
             summary.record(Duration.ofNanos(duration));
+        }
+
+        private void clear() {
+            FormatterUtils.setTimeZone(null);
+            FormatterUtils.setLocale(null);
+            WebContainerRequest.REQUEST.remove();
         }
 
 

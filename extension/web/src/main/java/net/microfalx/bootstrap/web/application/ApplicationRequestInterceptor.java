@@ -19,7 +19,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -32,7 +32,7 @@ import static net.microfalx.lang.StringUtils.*;
  * An MVC interceptor which handles the application related interactions.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class ApplicationRequestInterceptor implements HandlerInterceptor {
+class ApplicationRequestInterceptor implements AsyncHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRequestInterceptor.class);
 
@@ -155,18 +155,30 @@ class ApplicationRequestInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        handleTheme(request, handler);
         handleApplicationId(request);
+        handleTheme(request, handler);
         handleLocalStorage(request);
         return true;
     }
 
     @Override
+    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // async requests (SSE, DeferredResult, etc.) do not call afterCompletion on the request thread, so the
+        // thread locals would leak into the next request served by this (pooled) container thread
+        clear();
+    }
+
+    @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        clear();
+    }
+
+    private void clear() {
         Theme.clear();
         Application.clear();
         AssetBundle.clear();
         LocalStorage.clear();
+        MDC.clear();
     }
 
     @Getter
