@@ -5,11 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.utils.Failure;
 import net.microfalx.bootstrap.web.application.Application;
-import net.microfalx.bootstrap.web.application.ApplicationUtils;
 import net.microfalx.bootstrap.web.event.*;
 import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.threadpool.ThreadPool;
-import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +14,9 @@ import org.springframework.web.context.request.async.AsyncRequestNotUsableExcept
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.lang.System.currentTimeMillis;
-import static net.microfalx.bootstrap.web.event.EventService.SSE_TIMEOUT;
 import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
-import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.isEmpty;
-import static net.microfalx.lang.ThreadUtils.sleepMillis;
-import static net.microfalx.lang.TimeUtils.millisSince;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
@@ -33,6 +24,8 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @RequestMapping("/event")
 @Slf4j
 public class EventController implements AnonymousController {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Autowired
     private EventService eventService;
@@ -56,9 +49,12 @@ public class EventController implements AnonymousController {
             throw new EventException("Application identifier is not available for SSE connection");
         }
         SseEmitter emitter = new SseEmitter(0L);
-        ThreadPool threadPool = eventService.getThreadPool();
-        threadPool.execute(new EventsTask(emitter, application, eventService));
-        LOGGER.debug("Start SEE emitter for application {}", application);
+        EmitterSink sink = new EmitterSink(emitter, application);
+        emitter.onCompletion(sink::onCompletion);
+        emitter.onTimeout(sink::onCompletion);
+        emitter.onError(sink::onError);
+        eventService.register(application, sink);
+        LOGGER.debug("Start SSE emitter for application {}", application);
         return emitter;
     }
 
@@ -68,29 +64,24 @@ public class EventController implements AnonymousController {
         eventService.publish(event);
     }
 
-    private static class EventsTask implements Runnable {
+    /**
+     * An event sink which sends the events over an SSE connection.
+     */
+    private class EmitterSink implements EventSink {
 
         private final SseEmitter emitter;
         private final String application;
-        private final EventService eventService;
-        private final AtomicInteger index = new AtomicInteger(1);
-        private final ObjectMapper objectMapper;
-        private final AtomicBoolean completed = new AtomicBoolean(false);
-        private volatile Throwable throwable;
+        private final AtomicBoolean closed = new AtomicBoolean();
 
-        public EventsTask(SseEmitter emitter, String application, EventService eventService) {
+        private EmitterSink(SseEmitter emitter, String application) {
             this.emitter = emitter;
             this.application = application;
-            this.emitter.onCompletion(this::onCompletion);
-            this.emitter.onError(this::onError);
-            this.eventService = eventService;
-            this.objectMapper = new ObjectMapper();
         }
 
-        private void sendEvent(Event event) {
-            MDC.put("AppId", ApplicationUtils.getShortId(application));
+        @Override
+        public void send(Event event) throws Exception {
             Level level = event instanceof PingEvent ? Level.TRACE : Level.DEBUG;
-            LOGGER.atLevel(level).log("Send event {} for application {}", event, event.getApplication());
+            LOGGER.atLevel(level).log("Send event {} for application {}", event, application);
             SseEmitter.SseEventBuilder builder = SseEmitter.event().id(event.getId());
             if (event instanceof PingEvent) {
                 builder.comment("ping");
@@ -98,23 +89,45 @@ public class EventController implements AnonymousController {
                 builder.comment("application");
             }
             try {
-                String data = objectMapper.writeValueAsString(event);
-                builder.data(data);
+                builder.data(OBJECT_MAPPER.writeValueAsString(event));
                 emitter.send(builder);
-            } catch (IllegalStateException e) {
-                rethrowException(e);
             } catch (Exception e) {
-                throw new EventException("Failed to send event '" + event.getName() + "'", e);
+                if (isClientAbortError(e) || !isFatalError(e)) {
+                    LOGGER.debug("Communication error with client reason: {}", getRootCauseDescription(e));
+                } else {
+                    LOGGER.warn("Error while sending event {}, root cause: {}", event, getRootCauseDescription(e));
+                }
+                throw e;
+            }
+        }
+
+        @Override
+        public void close() {
+            if (closed.compareAndSet(false, true)) {
+                try {
+                    emitter.complete();
+                } catch (Exception e) {
+                    LOGGER.debug("Failed to complete SSE emitter for application {}, root cause: {}", application,
+                            getRootCauseDescription(e));
+                }
             }
         }
 
         private void onCompletion() {
-            completed.set(true);
+            closed.set(true);
+            eventService.unregister(application, this);
         }
 
         private void onError(Throwable throwable) {
-            completed.set(true);
-            this.throwable = throwable;
+            closed.set(true);
+            eventService.unregister(application, this);
+            if (isClientAbortError(throwable) || !isFatalError(throwable)) {
+                LOGGER.debug("SSE connection closed for application {}, reason: {}", application,
+                        getRootCauseDescription(throwable));
+            } else {
+                LOGGER.warn("SSE connection failed for application {}, root cause: {}", application,
+                        getRootCauseDescription(throwable));
+            }
         }
 
         private boolean isFatalError(Throwable e) {
@@ -125,37 +138,6 @@ public class EventController implements AnonymousController {
 
         private boolean isClientAbortError(Throwable throwable) {
             return throwable instanceof IllegalStateException || Failure.getType(throwable) == Failure.Type.RESET;
-        }
-
-        @Override
-        public void run() {
-            try {
-                long lastEvent = currentTimeMillis();
-                while (!completed.get() && millisSince(lastEvent) < SSE_TIMEOUT) {
-                    Event event = eventService.poll(application);
-                    if (event != null) {
-                        sendEvent(event);
-                        lastEvent = currentTimeMillis();
-                    } else {
-                        sleepMillis(20);
-                    }
-                }
-                sendEvent(new CloseEvent().setApplication(application));
-            } catch (IllegalStateException e) {
-                throwable = e;
-            } catch (Exception e) {
-                if (isFatalError(e)) throwable = e;
-                emitter.completeWithError(e);
-            } finally {
-                emitter.complete();
-            }
-            if (throwable != null) {
-                if (isClientAbortError(throwable)) {
-                    LOGGER.debug("Communication error with client reason: {}", getRootCauseDescription(throwable));
-                } else {
-                    LOGGER.warn("Error while processing events, root cause: {}", getRootCauseDescription(throwable));
-                }
-            }
         }
     }
 }
