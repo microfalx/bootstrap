@@ -15,7 +15,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
@@ -41,9 +48,52 @@ class EventServiceTest {
 
     @Test
     void pingFromServer() {
-        assertNull(eventService.poll(Application.current()));
+        runTasksInline();
+        List<Event> sent = new ArrayList<>();
+        eventService.register(Application.current(), sent::add);
+        assertTrue(sent.isEmpty());
         eventService.publish(new PingEvent());
-        assertNotNull(eventService.poll(Application.current()));
+        assertEquals(1, sent.size());
+    }
+
+    @Test
+    void eventsPublishedBeforeRegisterAreDelivered() {
+        runTasksInline();
+        eventService.publish(new TestEvent());
+        eventService.publish(new TestEvent());
+        List<Event> sent = new ArrayList<>();
+        eventService.register(Application.current(), sent::add);
+        assertEquals(2, sent.size());
+    }
+
+    @Test
+    void failedSinkIsUnregisteredAndEventIsKept() {
+        runTasksInline();
+        AtomicInteger closed = new AtomicInteger();
+        eventService.register(Application.current(), new EventSink() {
+
+            @Override
+            public void send(Event event) throws Exception {
+                throw new IOException("Broken pipe");
+            }
+
+            @Override
+            public void close() {
+                closed.incrementAndGet();
+            }
+        });
+        eventService.publish(new TestEvent());
+        assertEquals(1, closed.get());
+        List<Event> sent = new ArrayList<>();
+        eventService.register(Application.current(), sent::add);
+        assertEquals(1, sent.size());
+    }
+
+    private void runTasksInline() {
+        doAnswer(invocation -> {
+            invocation.<Runnable>getArgument(0).run();
+            return null;
+        }).when(threadPool).execute(any(Runnable.class));
     }
 
     @Test
@@ -63,7 +113,7 @@ class EventServiceTest {
 
     @Test
     void listeners() {
-        assertEquals(1, eventService.getEventListeners().size());
+        assertEquals(2, eventService.getEventListeners().size());
     }
 
     @Getter

@@ -54,20 +54,22 @@ Application.Sse.start = function (path, callback, params, options) {
             Logger.debug("Received a failure from '" + event.target.url + "', state: " + event.readyState);
         }
     };
+    return events;
 }
 
 /**
  * Changes whether SSE is enabled or not.
  *
+ * Enabling the SSE starts the default SSE channel (if not already started), disabling the SSE closes it.
+ *
  * @param {boolean} enabled true if SSE is enabled, false otherwise
  */
 Application.Sse.setEnabled = function (enabled) {
-    let prevEnabled = this.isEnabled();
     Application.Sse.enabled = enabled;
-    if (!prevEnabled && this.isEnabled()) {
-        this.startDefault();
-    } else if (prevEnabled && !this.isEnabled()) {
-        // how do we stop?
+    if (Application.Sse.isEnabled()) {
+        Application.Sse.startDefault();
+    } else {
+        Application.Sse.stopDefault();
     }
 }
 
@@ -95,8 +97,10 @@ Application.Sse.initialize = function () {
  * the application can decide to start the SSE based on other conditions.
  */
 Application.Sse.startDefault = function () {
-    Logger.info("Starting SSE connection, application: "+ Application.getId());
-    Application.Sse.start("/event/out", function (data, event) {
+    let current = Application.Sse.defaultEvents;
+    if (current && current.readyState !== SSE_READY_STATE_CLOSED) return;
+    Logger.info("Starting SSE connection, application: " + Application.getId());
+    Application.Sse.defaultEvents = Application.Sse.start("/event/out", function (data, event) {
         let json = JSON.parse(data);
         let name = json.name;
         delete json.name;
@@ -108,6 +112,17 @@ Application.Sse.startDefault = function () {
             Application.fire(name, json);
         }
     }, {}, {self: false});
+}
+
+/**
+ * Stops the default SSE channel, if started.
+ */
+Application.Sse.stopDefault = function () {
+    let current = Application.Sse.defaultEvents;
+    if (!current) return;
+    Logger.info("Stopping SSE connection, application: " + Application.getId());
+    current.close();
+    Application.Sse.defaultEvents = null;
 }
 
 Application.bind("start", Application.Sse.initialize);
