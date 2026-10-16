@@ -1,1 +1,0 @@
-select status from database_migrations where id = ?

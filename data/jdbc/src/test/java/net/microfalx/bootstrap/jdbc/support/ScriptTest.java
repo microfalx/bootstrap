@@ -1,6 +1,5 @@
 package net.microfalx.bootstrap.jdbc.support;
 
-import net.microfalx.bootstrap.jdbc.support.mysql.MySqlScript;
 import net.microfalx.resource.ClassPathResource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

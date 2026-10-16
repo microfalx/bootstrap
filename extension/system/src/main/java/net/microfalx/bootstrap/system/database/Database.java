@@ -9,7 +9,6 @@ import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
-import net.microfalx.bootstrap.jdbc.support.Node;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.lang.annotation.*;
 

@@ -1,1 +1,0 @@
-delete from registry_data where id = ?

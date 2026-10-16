@@ -1,1 +1,0 @@
-select count(*) from registry_nodes where parent_id = ?

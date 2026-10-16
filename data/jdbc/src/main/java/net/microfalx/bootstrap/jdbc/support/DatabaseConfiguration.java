@@ -1,8 +1,8 @@
 package net.microfalx.bootstrap.jdbc.support;
 
-import net.microfalx.bootstrap.jdbc.util.JdbcStorage;
-import net.microfalx.configuration.ConfigurationService;
-import net.microfalx.registry.RegistryService;
+import net.microfalx.database.Database;
+import net.microfalx.database.QueryProvider;
+import net.microfalx.database.Schema;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -24,14 +24,6 @@ public class DatabaseConfiguration {
 
     @Bean
     public QueryProvider queryProvider(Database database) {
-        return new QueryProviderImpl(database);
-    }
-
-    @Bean
-    public JdbcStorage jdbcStorage(QueryProvider queryProvider) {
-        JdbcStorage jdbcStorage = new JdbcStorage(queryProvider);
-        RegistryService.getInstance().setStorage(jdbcStorage);
-        ConfigurationService.getInstance().registerMetadata();
-        return jdbcStorage;
+        return database.getQueryProvider();
     }
 }
