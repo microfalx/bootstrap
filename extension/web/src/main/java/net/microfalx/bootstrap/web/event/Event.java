@@ -29,6 +29,15 @@ import net.microfalx.lang.Nameable;
 public interface Event extends Identifiable<String>, Nameable {
 
     /**
+     * Returns whether the event is an internal ping event.
+     * <p>
+     * Ping events are used to keep the connection alive and are not sent to the client.
+     *
+     * @return {@code true} if the event is a ping event, {@code false} otherwise
+     */
+    boolean isPing();
+
+    /**
      * Returns the application identifier the event is associated with.
      *
      * @return a non-null instance

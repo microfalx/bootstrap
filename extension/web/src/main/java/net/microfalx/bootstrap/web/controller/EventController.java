@@ -5,8 +5,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.utils.Failure;
 import net.microfalx.bootstrap.web.application.Application;
+import net.microfalx.bootstrap.web.application.ApplicationUtils;
 import net.microfalx.bootstrap.web.event.*;
 import net.microfalx.lang.ExceptionUtils;
+import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
+import static net.microfalx.lang.StringUtils.NA_ID_STRING;
 import static net.microfalx.lang.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
@@ -32,14 +35,15 @@ public class EventController implements AnonymousController {
 
     @ModelAttribute
     public void setHeaders(HttpServletRequest request) {
-        String application = request.getHeader("X-Application-Id");
-        if (isEmpty(application)) {
-            application = request.getParameter("applicationId");
+        String appId = request.getHeader("X-Application-Id");
+        if (isEmpty(appId)) {
+            appId = request.getParameter("applicationId");
         }
-        if (isEmpty(application)) {
+        if (isEmpty(appId)) {
             throw new EventException("Application identifier (X-Application-Id header or request parameter) is not set");
         }
-        Application.set(application);
+        Application.set(appId);
+        MDC.put("AppId", ApplicationUtils.getShortId(appId));
     }
 
     @GetMapping(path = "/out", produces = TEXT_EVENT_STREAM_VALUE)
@@ -82,6 +86,9 @@ public class EventController implements AnonymousController {
         public void send(Event event) throws Exception {
             Level level = event instanceof PingEvent ? Level.TRACE : Level.DEBUG;
             LOGGER.atLevel(level).log("Send event {} for application {}", event, application);
+            if (!event.isPing()) {
+                System.out.println("### Send event " + event + " for application " + application);
+            }
             SseEmitter.SseEventBuilder builder = SseEmitter.event().id(event.getId());
             if (event instanceof PingEvent) {
                 builder.comment("ping");

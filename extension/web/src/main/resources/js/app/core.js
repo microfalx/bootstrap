@@ -969,7 +969,8 @@ Application.initConfiguration = function () {
  * Initializes the application
  */
 Application.initialize = function () {
-    Logger.debug("Initialize application, request path '" + this.getPath() + "', request arguments '" + Utils.toString(this.getQuery()) + "'");
+    Logger.info("Initialize application '" + this.getId() + "', request path '" + this.getPath()
+        + "', request arguments '" + Utils.toString(this.getQuery()) + "'");
     this.initEvents();
     this.initTimeZone();
     LocalStorage.init();
