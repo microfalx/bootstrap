@@ -28,7 +28,7 @@ public class Session extends IdentityAware<String> {
     @Position(2)
     @Label(value = "Type", group = "Database")
     @Description("The type of database")
-    private net.microfalx.bootstrap.jdbc.support.Database.Type databaseType;
+    private net.microfalx.database.Database.Type databaseType;
 
     @Position(3)
     @Label(value = "Node", group = "Database")
@@ -45,7 +45,7 @@ public class Session extends IdentityAware<String> {
 
     @Position(20)
     @Description("The state of the database session")
-    private net.microfalx.bootstrap.jdbc.support.Session.State state;
+    private net.microfalx.database.Session.State state;
 
     @Position(30)
     @Description("The time since the session change its state")
@@ -70,7 +70,7 @@ public class Session extends IdentityAware<String> {
     @Visible
     private ZonedDateTime createdAt;
 
-    public static Session from(net.microfalx.bootstrap.jdbc.support.Session session) {
+    public static Session from(net.microfalx.database.Session session) {
         if (session == null) return null;
         Session model = new Session();
         model.setId(session.getId());

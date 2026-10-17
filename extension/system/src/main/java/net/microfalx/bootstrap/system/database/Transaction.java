@@ -28,7 +28,7 @@ public class Transaction extends IdentityAware<String> {
     @Position(2)
     @Label(value = "Type", group = "Database")
     @Description("The type of database")
-    private net.microfalx.bootstrap.jdbc.support.Database.Type databaseType;
+    private net.microfalx.database.Database.Type databaseType;
 
     @Position(3)
     @Label(value = "Node", group = "Database")
@@ -37,7 +37,7 @@ public class Transaction extends IdentityAware<String> {
 
     @Position(10)
     @Description("The state of the database transaction")
-    private net.microfalx.bootstrap.jdbc.support.Transaction.State state;
+    private net.microfalx.database.Transaction.State state;
 
     @Position(12)
     @Description("The time since the transaction was started")
@@ -84,14 +84,14 @@ public class Transaction extends IdentityAware<String> {
     @Position(40)
     @Description("The isolation level of the current transaction")
     @Label("Isolation Level")
-    private net.microfalx.bootstrap.jdbc.support.Transaction.IsolationLevel isolationLevel;
+    private net.microfalx.database.Transaction.IsolationLevel isolationLevel;
 
     @Position(100)
     @Description("The timestamp when the database transaction was started")
     @Visible
     private ZonedDateTime startedAt;
 
-    public static Transaction from(net.microfalx.bootstrap.jdbc.support.Transaction transaction) {
+    public static Transaction from(net.microfalx.database.Transaction transaction) {
         if (transaction == null) return null;
         Transaction model = new Transaction();
         model.setId(transaction.getId());

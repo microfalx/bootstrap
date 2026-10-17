@@ -24,7 +24,7 @@ public class Database extends NamedIdentityAware<String> {
     @Position(6)
     @Description("The type of the database (cluster)")
     @NotNull
-    private net.microfalx.bootstrap.jdbc.support.Database.Type type;
+    private net.microfalx.database.Database.Type type;
 
     @Position(10)
     @Description("The JDBC URL")
@@ -45,7 +45,7 @@ public class Database extends NamedIdentityAware<String> {
     @Label("State")
     @Description("The state of the database")
     @Formattable(alert = AlertProvider.class)
-    private Node.State state;
+    private net.microfalx.database.Node.State state;
 
     @Position(100)
     @Description("The timestamp when the database was started")
@@ -67,12 +67,12 @@ public class Database extends NamedIdentityAware<String> {
     private String validationError;
 
     /**
-     * Creates a model from a {@link net.microfalx.bootstrap.jdbc.support.Database}.
+     * Creates a model from a {@link net.microfalx.database.Database}.
      *
      * @param database the database
      * @return a non-null instance
      */
-    public static Database from(net.microfalx.bootstrap.jdbc.support.Database database) {
+    public static Database from(net.microfalx.database.Database database) {
         if (database == null) return null;
         Database model = new Database();
         model.setId(database.getId());
@@ -89,10 +89,10 @@ public class Database extends NamedIdentityAware<String> {
         return model;
     }
 
-    public static class AlertProvider implements Formattable.AlertProvider<Database, Field<Database>, Node.State> {
+    public static class AlertProvider implements Formattable.AlertProvider<Database, Field<Database>, net.microfalx.database.Node.State> {
 
         @Override
-        public Alert provide(Node.State value, Field<Database> field, Database model) {
+        public Alert provide(net.microfalx.database.Node.State value, Field<Database> field, Database model) {
             Alert.Type type = switch (value) {
                 case UP -> Alert.Type.SUCCESS;
                 case DOWN -> Alert.Type.DANGER;

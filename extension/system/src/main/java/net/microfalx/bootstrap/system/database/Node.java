@@ -31,7 +31,7 @@ public class Node extends IdentityAware<String> {
     @Position(11)
     @Label(value = "Type", group = "Database")
     @Description("The type of database")
-    private net.microfalx.bootstrap.jdbc.support.Database.Type databaseType;
+    private net.microfalx.database.Database.Type databaseType;
 
     @Position(6)
     @Description("The hostname of the database node")
@@ -45,7 +45,7 @@ public class Node extends IdentityAware<String> {
     @Position(12)
     @Description("The state of the database node")
     @Formattable(alert = AlertProvider.class)
-    private net.microfalx.bootstrap.jdbc.support.Node.State state;
+    private net.microfalx.database.Node.State state;
 
     @Position(100)
     @Description("The timestamp when the database was started")
@@ -57,12 +57,12 @@ public class Node extends IdentityAware<String> {
     private String validationError;
 
     /**
-     * Creates a model from a {@link net.microfalx.bootstrap.jdbc.support.Node}.
+     * Creates a model from a {@link net.microfalx.database.Node}.
      *
      * @param node the node
      * @return a non-null instance
      */
-    public static Node from(net.microfalx.bootstrap.jdbc.support.Node node) {
+    public static Node from(net.microfalx.database.Node node) {
         if (node == null) return null;
         Node model = new Node();
         model.setId(node.getId());
@@ -77,10 +77,10 @@ public class Node extends IdentityAware<String> {
         return model;
     }
 
-    public static class AlertProvider implements Formattable.AlertProvider<Node, Field<Node>, net.microfalx.bootstrap.jdbc.support.Node.State> {
+    public static class AlertProvider implements Formattable.AlertProvider<Node, Field<Node>, net.microfalx.database.Node.State> {
 
         @Override
-        public Alert provide(net.microfalx.bootstrap.jdbc.support.Node.State value, Field<Node> field, Node model) {
+        public Alert provide(net.microfalx.database.Node.State value, Field<Node> field, Node model) {
             Alert.Type type = switch (value) {
                 case UP -> Alert.Type.SUCCESS;
                 case DOWN -> Alert.Type.DANGER;

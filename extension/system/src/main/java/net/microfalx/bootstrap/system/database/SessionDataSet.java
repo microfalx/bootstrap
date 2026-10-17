@@ -2,7 +2,6 @@ package net.microfalx.bootstrap.system.database;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.PojoDataSet;
-import net.microfalx.bootstrap.jdbc.support.DatabaseService;
 import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
@@ -16,7 +15,7 @@ import java.util.Optional;
 @Provider
 public class SessionDataSet extends PojoDataSet<Session, PojoField<Session>, String> {
 
-    private DatabaseService databaseService;
+    private net.microfalx.database.DatabaseService databaseService;
 
     public SessionDataSet(DataSetFactory<Session, PojoField<Session>, String> factory,
                           Metadata<Session, PojoField<Session>, String> metadata) {
@@ -25,7 +24,7 @@ public class SessionDataSet extends PojoDataSet<Session, PojoField<Session>, Str
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        databaseService = getService(DatabaseService.class);
+        databaseService = net.microfalx.database.DatabaseService.getInstance();
     }
 
     @Override
