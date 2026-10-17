@@ -142,7 +142,7 @@ class ApplicationRequestInterceptor implements AsyncHandlerInterceptor {
     }
 
     private void handleApplicationId(HttpServletRequest request) {
-        String appId = defaultIfEmpty(request.getHeader("X-Application-Id"), "na");
+        String appId = defaultIfEmpty(request.getHeader("X-Application-Id"), NA_ID_STRING);
         Application.set(appId);
         MDC.put("AppId", ApplicationUtils.getShortId(appId));
         MDC.put("ReqId", REQUEST_ID_GENERATOR.nextAsString());

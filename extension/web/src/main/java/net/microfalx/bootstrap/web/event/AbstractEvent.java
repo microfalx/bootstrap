@@ -26,6 +26,10 @@ public abstract class AbstractEvent implements Event {
         this.name = EventUtilities.getEventName(getClass());
     }
 
+    public boolean isPing() {
+        return this instanceof PingEvent;
+    }
+
     protected void updateToString(StringJoiner joiner) {
     }
 

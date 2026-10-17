@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.TimeZone;
 
 import static java.util.Optional.ofNullable;
+import static net.microfalx.lang.StringUtils.NA_ID_STRING;
 import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 /**
@@ -42,7 +43,7 @@ public final class Application implements Identifiable<String>, Nameable, Descri
      * @return a non-null instance
      */
     public static String current() {
-        return defaultIfEmpty(APPLICATION.get(), "na");
+        return defaultIfEmpty(APPLICATION.get(), NA_ID_STRING);
     }
 
     /**
