@@ -93,12 +93,12 @@ public class DatabaseService implements InitializingBean {
     }
 
     /**
-     * Returns the default database.
+     * Returns the default database (the application database)
      *
      * @return the data source
      */
     public Database getDefaultDatabase() {
-        return getDatabaseService().getDefaultDatabase();
+        return getDatabaseService().getDefaultDatabase().orElseThrow();
     }
 
     /**

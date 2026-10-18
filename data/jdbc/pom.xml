@@ -96,8 +96,8 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx</groupId>
-            <artifactId>database</artifactId>
+            <groupId>net.microfalx.argus</groupId>
+            <artifactId>argus-database</artifactId>
         </dependency>
 
         <dependency>

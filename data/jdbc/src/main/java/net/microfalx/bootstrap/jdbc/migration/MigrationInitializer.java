@@ -3,6 +3,8 @@ package net.microfalx.bootstrap.jdbc.migration;
 import net.microfalx.bootstrap.jdbc.support.DatabaseService;
 import net.microfalx.configuration.ConfigurationService;
 import net.microfalx.database.migration.Session;
+import net.microfalx.registry.RegistryService;
+import net.microfalx.registry.jdbc.JdbcStorage;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -34,6 +36,7 @@ public class MigrationInitializer implements InitializingBean {
     }
 
     private void postMigration() {
+        RegistryService.getInstance().setStorage(new JdbcStorage());
         ConfigurationService.getInstance().registerMetadata();
     }
 }
