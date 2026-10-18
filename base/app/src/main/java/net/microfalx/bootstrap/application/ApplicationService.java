@@ -1,8 +1,10 @@
 package net.microfalx.bootstrap.application;
 
+import net.microfalx.argus.api.LoggerService;
 import net.microfalx.lang.JvmUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
+import net.microfalx.service.api.ServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -60,8 +62,11 @@ public final class ApplicationService implements InitializingBean {
 
     @EventListener(ApplicationStartedEvent.class)
     public void onStart(ApplicationStartedEvent event) {
-        LOGGER.info("Started application, version: {}, build number: {}, build time: {}",
-                application.getVersion(), application.getBuildNumber(), application.getBuildTime());
+        LoggerService loggerService = LoggerService.getInstance();
+        LOGGER.info("Started application, version: {}, build number: {}, build time: {}, warnings: {}, errors: {}",
+                application.getVersion(), application.getBuildNumber(), application.getBuildTime()
+                , loggerService.getWarningCounts()[0], loggerService.getErrorCounts()[0]);
+        ServiceLocator.current().ready();
     }
 
     private void registerApplicationProperties(ConfigurableEnvironment environment) {
