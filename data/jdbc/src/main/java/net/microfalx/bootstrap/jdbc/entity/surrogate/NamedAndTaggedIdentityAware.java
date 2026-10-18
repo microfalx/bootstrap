@@ -23,7 +23,7 @@ import java.util.Set;
 @ToString(callSuper = true)
 @Getter
 @Setter
-public abstract class NamedAndTaggedIdentityAware<T extends Serializable> extends NamedIdentityAware<T> {
+public abstract class NamedAndTaggedIdentityAware<T extends Number & Serializable> extends NamedIdentityAware<T> {
 
     @Column(name = "tags")
     @Position(400)

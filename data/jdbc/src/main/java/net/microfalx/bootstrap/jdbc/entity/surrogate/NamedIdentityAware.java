@@ -21,7 +21,7 @@ import java.io.Serializable;
 @ToString(callSuper = true)
 @Getter
 @Setter
-public abstract class NamedIdentityAware<T extends Serializable> extends IdentityAware<T> implements Nameable {
+public abstract class NamedIdentityAware<T extends Number & Serializable> extends IdentityAware<T> implements Nameable {
 
     @Serial
     private static final long serialVersionUID = -720697127573911840L;

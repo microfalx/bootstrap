@@ -19,7 +19,7 @@ import java.io.Serializable;
 @ToString(callSuper = true)
 @Getter
 @Setter
-public abstract class NamedAndOwnedAndTaggedAndTimestampedIdentityAware<T extends Serializable> extends NamedAndTaggedAndTimestampedIdentityAware<T> implements Ownable<String> {
+public abstract class NamedAndOwnedAndTaggedAndTimestampedIdentityAware<T extends Number & Serializable> extends NamedAndTaggedAndTimestampedIdentityAware<T> implements Ownable<String> {
 
     @Column(name = "created_by", nullable = false, updatable = false)
     @Position(502)

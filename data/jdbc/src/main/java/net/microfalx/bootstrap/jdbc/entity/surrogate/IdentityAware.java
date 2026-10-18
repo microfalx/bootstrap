@@ -20,7 +20,7 @@ import java.util.Objects;
 @ToString
 @Getter
 @Setter
-public abstract class IdentityAware<T extends Serializable> implements Identifiable<T>, Serializable {
+public abstract class IdentityAware<T extends Number & Serializable> implements Identifiable<T>, Serializable {
 
     @Serial
     private static final long serialVersionUID = 1023653519669708398L;

@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 @Getter
 @Setter
-public abstract class NamedAndTimestampedIdentityAware<T extends Serializable> extends NamedIdentityAware<T> implements Timestampable<LocalDateTime> {
+public abstract class NamedAndTimestampedIdentityAware<T extends Number & Serializable> extends NamedIdentityAware<T> implements Timestampable<LocalDateTime> {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @NotNull
