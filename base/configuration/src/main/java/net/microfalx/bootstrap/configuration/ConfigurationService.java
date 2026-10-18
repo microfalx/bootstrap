@@ -8,7 +8,9 @@ import net.microfalx.configuration.Metadata;
 import net.microfalx.registry.Registry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -124,6 +126,11 @@ public class ConfigurationService implements InitializingBean {
      */
     public void clearCache() {
         getConfigurationService().clearCache();
+    }
+
+    @EventListener(ApplicationStartedEvent.class)
+    public void registerMetadata(ApplicationStartedEvent event) {
+        getConfigurationService().registerMetadata();
     }
 
     void propertyChanged(Configuration configuration, String key, String previousValue, String currentValue) {
