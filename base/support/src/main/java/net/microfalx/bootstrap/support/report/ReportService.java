@@ -6,6 +6,7 @@ import net.microfalx.argus.api.HealthSettings;
 import net.microfalx.argus.api.Issue;
 import net.microfalx.argus.report.Fragment;
 import net.microfalx.argus.report.Report;
+import net.microfalx.argus.report.ReportSettings;
 import net.microfalx.bootstrap.application.Application;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ObjectUtils;
@@ -163,11 +164,6 @@ public class ReportService implements InitializingBean {
 
     }
 
-
-    private net.microfalx.argus.report.ReportService getReportService() {
-        return net.microfalx.argus.report.ReportService.getInstance();
-    }
-
     private void initApplicationContext() {
         getReportService().getProviders().forEach(provider -> {
             if (provider instanceof ApplicationContextAware applicationContextAware) {
@@ -177,13 +173,32 @@ public class ReportService implements InitializingBean {
     }
 
     private void initSettings() {
-        HealthSettings settings = getHealthService().getSettings()
+        HealthSettings healthSettings = getHealthService().getSettings()
                 .withReportToken(configuration.getReportToken());
-        getHealthService().setSettings(settings);
+        getHealthService().setSettings(healthSettings);
+
+        ReportSettings reportSettings = getReportService().getSettings()
+                .withEnabled(configuration.isEnabled())
+                .withOnBoot(configuration.isOnBoot())
+                .withSystemName(application.getName())
+                .withSystemVersion(application.getVersion())
+                .withPassword(configuration.getPassword())
+                .withRecipients(configuration.getRecipients())
+                .withOnNotice(configuration.isOnNotice())
+                .withCriticalIssuesThreshold(configuration.getCriticalIssuesThreshold())
+                .withHighIssuesThreshold(configuration.getHighIssuesThreshold())
+                .withDailySchedule(configuration.getDailySchedule())
+                .withWithIssuesSchedule(configuration.getWithIssuesSchedule());
+        getReportService().setSettings(reportSettings);
+
     }
 
     private HealthService getHealthService() {
         return HealthService.getInstance();
+    }
+
+    private net.microfalx.argus.report.ReportService getReportService() {
+        return net.microfalx.argus.report.ReportService.getInstance();
     }
 
 }
