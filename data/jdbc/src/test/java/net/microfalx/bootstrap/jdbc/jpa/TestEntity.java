@@ -14,7 +14,7 @@ import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 @Getter
 @Setter
 @ToString
-public class TestEntity extends NamedAndTimestampedIdentityAware implements Cloneable {
+public class TestEntity extends NamedAndTimestampedIdentityAware<Integer> implements Cloneable {
 
     @Id
     @Column(name = "id", nullable = false)

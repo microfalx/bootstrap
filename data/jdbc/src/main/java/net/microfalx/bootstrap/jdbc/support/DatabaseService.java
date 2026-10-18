@@ -1,8 +1,7 @@
 package net.microfalx.bootstrap.jdbc.support;
 
-import com.zaxxer.hikari.HikariDataSource;
 import net.microfalx.database.*;
-import net.microfalx.lang.ClassUtils;
+import net.microfalx.database.DatabaseUtils;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +19,6 @@ import java.util.concurrent.Future;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.defaultIfEmpty;
-import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
  * A service which provides database specific support.
@@ -34,9 +31,19 @@ public class DatabaseService implements InitializingBean {
     @Autowired(required = false)
     private javax.sql.DataSource dataSource;
 
-    @Value("${bootstrap.application.name}")
+    private DataSource mainDataSource;
+
+    @Value("${bootstrap.application.name:Unknown}")
     private String applicationName;
-    private String defaultDataSource;
+
+    /**
+     * Returns the main data source for this service.
+     *
+     * @return a non-null optional
+     */
+    public Optional<DataSource> getDataSource() {
+        return Optional.ofNullable(mainDataSource);
+    }
 
     /**
      * Returns the task executor for this service.
@@ -151,22 +158,6 @@ public class DatabaseService implements InitializingBean {
     }
 
     /**
-     * Updates the data source properties with information
-     *
-     * @param dataSource the data source
-     * @return an update data source
-     */
-    public DataSource updateProperties(DataSource dataSource) {
-        javax.sql.DataSource unwrapped = dataSource.unwrap();
-        if (unwrapped instanceof HikariDataSource hikariDataSource) {
-            dataSource = dataSource.withUri(URI.create(hikariDataSource.getJdbcUrl())).withUserName(hikariDataSource.getUsername());
-        } else {
-            LOGGER.error("Unknown data source implementation: {}", ClassUtils.getName(dataSource));
-        }
-        return dataSource;
-    }
-
-    /**
      * Returns nodes from all databases.
      *
      * @return a non-null instance
@@ -198,14 +189,15 @@ public class DatabaseService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (dataSource != null) {
-            String name = defaultIfEmpty(applicationName, "Default");
-            String id = toIdentifier(name);
-            this.defaultDataSource = id;
-            DataSource newDataSource = updateProperties(DataSource.create(id, name, dataSource)
-                    .withDescription("The application database"));
-            registerDataSource(newDataSource);
-        }
+        initDataSource();
+    }
+
+    private void initDataSource() {
+        if (dataSource == null) return;
+        String name = defaultIfEmpty(applicationName, "Unknown");
+        mainDataSource = DataSource.create(DatabaseUtils.DEFAULT_ID, name, dataSource);
+        DataSource newDataSource = getDatabaseService().updateProperties(mainDataSource.withDescription("The application main database"));
+        registerDataSource(newDataSource);
     }
 
     private net.microfalx.database.DatabaseService getDatabaseService() {
