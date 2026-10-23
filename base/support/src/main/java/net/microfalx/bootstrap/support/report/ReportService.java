@@ -7,10 +7,14 @@ import net.microfalx.argus.api.Issue;
 import net.microfalx.argus.report.Fragment;
 import net.microfalx.argus.report.Report;
 import net.microfalx.argus.report.ReportSettings;
+import net.microfalx.argus.report.Template;
 import net.microfalx.bootstrap.application.Application;
+import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.annotation.Provider;
+import net.microfalx.resource.Resource;
 import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +25,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.time.Duration.ofHours;
@@ -170,6 +174,11 @@ public class ReportService implements InitializingBean {
                 applicationContextAware.setApplicationContext(applicationContext);
             }
         });
+        getReportService().getListeners().forEach(listener -> {
+            if (listener instanceof ApplicationContextAware applicationContextAware) {
+                applicationContextAware.setApplicationContext(applicationContext);
+            }
+        });
     }
 
     private void initSettings() {
@@ -199,6 +208,49 @@ public class ReportService implements InitializingBean {
 
     private net.microfalx.argus.report.ReportService getReportService() {
         return net.microfalx.argus.report.ReportService.getInstance();
+    }
+
+    @Provider
+    public static final class ArgusReportListener extends ApplicationContextSupport
+            implements net.microfalx.argus.report.ReportingListener {
+
+        @Override
+        public void update(Template template) {
+            for (ReportingListener listener : getListeners()) {
+                listener.update(template);
+            }
+        }
+
+        @Override
+        public Set<String> getDestinations() {
+            Set<String> destinations = new HashSet<>();
+            for (ReportingListener listener : getListeners()) {
+                destinations.addAll(listener.getDestinations());
+            }
+            return destinations;
+        }
+
+        @Override
+        public Collection<Issue> getIssues() {
+            Collection<Issue> issues = new ArrayList<>();
+            for (ReportingListener listener : getListeners()) {
+                issues.addAll(listener.getIssues());
+            }
+            return issues;
+        }
+
+        @Override
+        public boolean send(Set<String> destinations, String title, Resource summary, Optional<Resource> attachment) {
+            boolean sent = false;
+            for (ReportingListener listener : getListeners()) {
+                sent |= listener.send(destinations, title, summary, attachment);
+            }
+            return sent;
+        }
+
+        private Collection<ReportingListener> getListeners() {
+            return getBean(ReportService.class).listeners;
+        }
     }
 
 }
