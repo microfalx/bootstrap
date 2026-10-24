@@ -6,6 +6,9 @@
         <item key="onBoot" name="On Boot" data-type="boolean" default="true" description="Indicates whether the a support email is sent on boot"/>
         <item key="onNotice" name="On Notice" data-type="boolean" default="false" description="Indicates whether the a support email is sent on when an issue of type 'Notice' is registered"/>
 
+        <item key="reportTheme" name="Report" separator="Theme" default="light" description="Provides the theme for the report itself"/>
+        <item key="summaryTheme" name="Summary" default="dark" description="Provides the theme for the report itself"/>
+
         <item key="dailySchedule" name="Daily" separator="Schedules" default="0 0 0 * * ?" description="The daily report daily schedule in CRON format."/>
         <item key="withIssuesSchedule" name="With Issues" default="0 0 0/6 ? * * *" description="The regular issues report schedule in CRON format."/>
         <item key="withCriticalIssuesSchedule" name="With Critical Issues" default="0 0/15 * ? * * *" description="The critical report schedule in CRON format."/>

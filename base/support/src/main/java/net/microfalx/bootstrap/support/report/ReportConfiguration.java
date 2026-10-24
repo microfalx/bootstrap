@@ -118,4 +118,21 @@ public interface ReportConfiguration extends ConfigurationListenerAware {
     @DefaultValue("UdDLyEprdTXZU6XHJCGg")
     String getReportToken();
 
+    /**
+     * Returns the report theme.
+     *
+     * @return a non-null instance
+     */
+    @DefaultValue("light")
+    String getReportTheme();
+
+
+    /**
+     * Returns the summary theme.
+     *
+     * @return a non-null instance
+     */
+    @DefaultValue("dark")
+    String getSummaryTheme();
+
 }

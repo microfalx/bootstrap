@@ -11,6 +11,7 @@ import net.microfalx.argus.report.Template;
 import net.microfalx.bootstrap.application.Application;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.lang.ClassUtils;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Provider;
@@ -194,6 +195,8 @@ public class ReportService implements InitializingBean {
                 .withPassword(configuration.getPassword())
                 .withRecipients(configuration.getRecipients())
                 .withOnNotice(configuration.isOnNotice())
+                .withReportTheme(EnumUtils.fromName(Report.Theme.class, configuration.getReportTheme(), Report.Theme.LIGHT))
+                .withSummaryTheme(EnumUtils.fromName(Report.Theme.class, configuration.getSummaryTheme(), Report.Theme.DARK))
                 .withCriticalIssuesThreshold(configuration.getCriticalIssuesThreshold())
                 .withHighIssuesThreshold(configuration.getHighIssuesThreshold())
                 .withDailySchedule(configuration.getDailySchedule())
