@@ -240,10 +240,12 @@ public class ReportService implements InitializingBean {
         }
 
         @Override
-        public boolean send(Set<String> destinations, String title, Resource summary, Optional<Resource> attachment) {
+        public boolean send(Set<String> destinations, String title,
+                            Resource summary, Resource fullReport,
+                            Optional<Resource> attachment) {
             boolean sent = false;
             for (ReportingListener listener : getListeners()) {
-                sent |= listener.send(destinations, title, summary, attachment);
+                sent |= listener.send(destinations, title, summary, fullReport, attachment);
             }
             return sent;
         }

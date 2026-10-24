@@ -16,7 +16,9 @@ import java.util.Set;
 public class MailReportingListener extends ApplicationContextSupport implements ReportingListener {
 
     @Override
-    public boolean send(Set<String> destinations, String title, Resource summary, Optional<Resource> attachment) {
+    public boolean send(Set<String> destinations, String title,
+                        Resource summary, Resource fullReport,
+                        Optional<Resource> attachment) {
         MailService mailService = getBean(MailService.class);
         for (String destination : destinations) {
             try {

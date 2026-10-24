@@ -47,10 +47,12 @@ public interface ReportingListener {
      * @param destinations the email destinations
      * @param title        the email title
      * @param summary      the summary resource
+     * @param fullReport   the full report resource
      * @param attachment   the optional attachment resource
      * @return {@code true} if the report has been sent, {@code false} otherwise
      */
-    default boolean send(Set<String> destinations, String title, Resource summary,
+    default boolean send(Set<String> destinations, String title,
+                         Resource summary, Resource fullReport,
                          Optional<Resource> attachment) {
         return false;
     }
