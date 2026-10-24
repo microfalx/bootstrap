@@ -4,7 +4,7 @@
 
 <thead th:class="${#bootstrap.isLightTheme()} ? 'table-light' : 'table-dark'" th:fragment="grid-header">
 <tr th:if="${#dataset.hasColumnGroups()}">
-    <th scope="col" class="text-right align-middle" rowspan="2">#</th>
+    <th scope="col" class="text-right align-middle index-field" rowspan="2">#</th>
     <th scope="col" th:each="group : ${#dataset.getColumnGroupsFirstRow()}" th:class="${#dataset.getHeaderClass(group)}" th:style="${#dataset.getHeaderStyle(group)}"
         th:attr="field_name=${group.getField().name},field_index=${#dataset.getFieldIndex(group.getField())}" component:tooltip="${group.getField()}" th:colspan="${group.getColSpan()}" th:rowspan="${group.getRowSpan()}">
         <span th:utext="${group.label}"></span>
@@ -29,7 +29,7 @@
 
 <tr th:fragment="grid-row" th:class="${#dataset.getPrimaryRowClass(model)}">
     <div th:text="${#dataset.beforeBrowse(model)}" th:remove="tag"></div>
-    <td class="text-right" th:text="${#dataset.getCurrentIndex()}" th:attr="data-table-row-id=${#dataset.getId(model)}"></td>
+    <td class="text-right index-field" th:text="${#dataset.getCurrentIndex()}" th:attr="data-table-row-id=${#dataset.getId(model)}"></td>
     <td th:each="field : ${#dataset.getFields()}" th:class="${#dataset.getCellClass(field)}" th:with="alert=${#dataset.getAlert(model, field)},actionable=${#dataset.getActionable(model, field)},tooltip=${#dataset.getTooltip(model, field)}">
         <span th:if="${#dataset.hasDisplayValue(field)}" th:utext="${#dataset.getDisplayValue(model, field)}"
               th:class="${#dataset.getAlertClass(alert)}" th:style="${#dataset.getAlertStyle(alert)}" component:fast-tooltip="${tooltip}">

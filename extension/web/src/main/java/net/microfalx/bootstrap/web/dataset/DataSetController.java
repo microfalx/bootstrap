@@ -1349,7 +1349,7 @@ public abstract class DataSetController<M, ID> extends NavigableController<M, ID
         range = defaultIfEmpty(range, "<empty>");
         query = defaultIfEmpty(query, "<empty>");
         sort = defaultIfEmpty(sort, "<empty>");
-        LOGGER.debug("{} data set {}, page {}, range{}, query {}, sort {}", capitalizeWords(action), dataSet.getName(),
+        LOGGER.info("{} data set {}, page {}, range{}, query {}, sort {}", capitalizeWords(action), dataSet.getName(),
                 page, range, query, sort);
     }
 

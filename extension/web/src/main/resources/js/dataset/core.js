@@ -139,9 +139,9 @@ DataSet.loadPage = function (page) {
     page = parseInt(page);
     DataSet.get("page", {page: page}, function (data, status, xhr) {
         $("#dataset-grid tbody").append(data);
-        $("#more_results").attr("data-page", page + 1);
-        $("#page_info").text(xhr.getResponseHeader('X-DATASET-PAGE-INFO'));
-        $("#page_info_and_records").text(xhr.getResponseHeader('X-DATASET-PAGE-INFO-EXTENDED'));
+        $("#dataset-toolbar-page-info").text(xhr.getResponseHeader('X-DATASET-PAGE-INFO'));
+        $("#dataset-footer-more-results").attr("data-page", page + 1);
+        $("#dataset-footer-records").text(xhr.getResponseHeader('X-DATASET-PAGE-INFO-EXTENDED'));
         Chart.process("#dataset-grid tbody");
     });
 }

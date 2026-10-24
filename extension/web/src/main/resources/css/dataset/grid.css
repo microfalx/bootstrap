@@ -17,9 +17,11 @@
     cursor: pointer;
 }
 
-.dataset-table th.index-field {
-    max-width : 40px;
+.dataset-table th.index-field, .dataset-table td.index-field {
+    max-width : 35px;
+    min-width:  35px;
     width: 35px;
+    text-align: right !important;
 }
 
 .dataset-table th.date-time-field {
@@ -42,11 +44,18 @@
     width: 80px;
 }
 
+.dataset-table th {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 .dataset-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 0;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .dataset-table-resizer {
