@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static org.springframework.boot.context.logging.LoggingApplicationListener.DEFAULT_ORDER;
 
 public class LoggerApplicationListener implements ApplicationListener<SpringApplicationEvent>, Ordered {
@@ -29,8 +30,11 @@ public class LoggerApplicationListener implements ApplicationListener<SpringAppl
         // do not log with SL4J until the logger service is initialized
         ServiceLocator.current().setQuiet(true);
         // redirects the property which controls the directory where the logs are stored to the property defined in the bootstrap configuration
-        System.setProperty(LoggerSettings.DIRECTORY_PROP, environment.getProperty("bootstrap.logger.directory"));
-        // wait for the
+        String loggerDirectory = environment.getProperty("bootstrap.logger.directory");
+        if (isNotEmpty(loggerDirectory)) {
+            System.setProperty(LoggerSettings.DIRECTORY_PROP, loggerDirectory);
+        }
+        // wait for the application to start
         System.setProperty(LoggerSettings.LAZY_PROP, "true");
         // register the logger service, which will initialize the loggers and redirect the logging to the logger service
         LoggerService.getInstance().register();
