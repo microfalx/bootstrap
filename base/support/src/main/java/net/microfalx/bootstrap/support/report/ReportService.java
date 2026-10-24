@@ -19,17 +19,14 @@ import net.microfalx.resource.Resource;
 import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static java.time.Duration.ofHours;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -131,14 +128,6 @@ public class ReportService implements InitializingBean {
         initListeners();
         initApplicationContext();
         initSettings();
-    }
-
-    @EventListener
-    public void onApplicationEvent(ApplicationStartedEvent event) {
-        initApplicationContext();
-        if (configuration.isEnabled() && configuration.isOnBoot()) {
-            threadPool.execute(() -> send(ofHours(1), "Startup"));
-        }
     }
 
     private void loadListeners() {
