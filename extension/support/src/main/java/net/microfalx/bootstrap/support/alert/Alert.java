@@ -8,6 +8,7 @@ import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.Formatters;
 import net.microfalx.bootstrap.dataset.model.IdentityAware;
+import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -29,40 +30,40 @@ public class Alert extends IdentityAware<String> {
 
     @Position(10)
     @Label(value = "Failure Type")
-    @Width("120px")
+    @Width("100px")
     private String failureType;
 
     @Position(11)
     @Description("The severity level")
-    @Width("70px")
+    @Width("60px")
     private LoggerEvent.Level level;
 
     @Position(15)
     @Label(value = "Ack.")
     @Description("Indicates whether the alert has been acknowledged")
-    @Width("70px")
+    @Width("60px")
     private boolean acknowledged;
 
     @Position(20)
     @Label(value = "Total", group = "Counts")
     @Description("The total number of alerts received")
-    @Width("70px")
+    @Width("60px")
     private long totalCount;
 
     @Position(21)
     @Label(value = "Pending", group = "Counts")
     @Description("The total number of alerts received since the last acknowledgement")
-    @Width("70px")
+    @Width("60px")
     private long pendingCount;
 
     @Position(31)
     @Label(value = "Exception Class")
-    @Visible(false)
+    @Width("120px")
     private String failureClass;
 
     @Position(100)
     @Description("The time when the alert started to fire")
-    @Width("120px")
+    @Width("80px")
     @CreatedDate
     @CreatedAt
     @Formattable(tooltip = Formatters.CreatedAtTooltip.class, elapsed = true)
@@ -70,13 +71,17 @@ public class Alert extends IdentityAware<String> {
 
     @Position(101)
     @Description("The last time when the alert fired")
-    @Width("120px")
+    @Width("80px")
     @OrderBy(OrderBy.Direction.DESC)
     @Formattable(tooltip = Formatters.ModifiedAtTooltip.class, elapsed = true)
     @LastModifiedDate
     @ModifiedAt
     @Timestamp
     private LocalDateTime modifiedAt;
+
+    @Position(200)
+    @Visible(value = false)
+    private String failureStackTrace;
 
     public static Alert from(net.microfalx.argus.api.Alert event) {
         if (event == null) return null;
@@ -88,7 +93,8 @@ public class Alert extends IdentityAware<String> {
         model.setMessage(event.getMessage());
         model.setAcknowledged(event.isAcknowledged());
         model.setFailureType(event.getFailureType());
-        model.setFailureClass(event.getFailureClass());
+        model.setFailureClass(ClassUtils.getCompactName(event.getFailureClass()));
+        model.setFailureStackTrace(event.getFailureStackTrace());
         model.setTotalCount(event.getTotalEventCount());
         model.setPendingCount(event.getPendingEventCount());
         return model;

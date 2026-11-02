@@ -52,7 +52,7 @@ public class AlertController extends DataSetController<Alert, String> {
             if (alert != null) {
                 controllerModel.addAttribute("alert", alert);
                 controllerModel.addAttribute("message", org.apache.commons.lang3.StringUtils.abbreviate(alert.getMessage(), 100));
-                controllerModel.addAttribute("stackTrace", alert.getEvent().getExceptionStackTrace());
+                controllerModel.addAttribute("stackTrace", alert.getFailureStackTrace());
             }
         }
     }
