@@ -73,6 +73,7 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
+            <version>5.7.1</version>
         </dependency>
 
         <!-- Spring -->
