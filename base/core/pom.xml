@@ -69,13 +69,6 @@
             <artifactId>argus-api</artifactId>
         </dependency>
 
-        <!-- Reimport to enforce version -->
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
-            <version>5.7.1</version>
-        </dependency>
-
         <!-- Spring -->
 
         <dependency>
