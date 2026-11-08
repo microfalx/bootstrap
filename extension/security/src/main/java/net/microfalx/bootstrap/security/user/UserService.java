@@ -189,6 +189,39 @@ public class UserService extends ApplicationContextSupport implements ApiCredent
     }
 
     /**
+     * Returns whether a user with a given username and password is valid.
+     *
+     * @param userName the user name
+     * @param password the current password
+     * @return {@code true} if the user is valid, {@code false} otherwise
+     */
+    public boolean validate(String userName, String password) {
+        requireNotEmpty(userName);
+        requireNotEmpty(password);
+        UserDetails userDetails = findUserDetails(userName);
+        if (userDetails == null) return false;
+        return passwordEncoder.matches(password, userDetails.getPassword());
+    }
+
+    /**
+     * Updates the password for a given user.
+     *
+     * @param userName    the user name
+     * @param newPassword the new password
+     */
+    public void updatePassword(String userName, String newPassword) {
+        requireNotEmpty(userName);
+        requireNotEmpty(newPassword);
+        UserDetails userDetails = findUserDetails(userName);
+        if (userDetails == null)
+            throw new SecurityException("A user with user name '" + userName + "' could not be located");
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        LOGGER.info("Update password for '{}'", userName);
+        userRepository.updatePassword(encodedNewPassword, false, normalizeUserName(userName));
+        securityContexts.remove(normalizeUserName(userName));
+    }
+
+    /**
      * Updates the display name and the email
      *
      * @param displayName the display name

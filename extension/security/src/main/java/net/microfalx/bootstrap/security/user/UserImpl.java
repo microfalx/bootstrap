@@ -30,6 +30,11 @@ class UserImpl implements User {
     private Collection<GrantedAuthority> authorities = Collections.emptyList();
 
     @Override
+    public String getUsername() {
+        return userName;
+    }
+
+    @Override
     public String getPassword() {
         return null;
     }

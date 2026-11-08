@@ -121,6 +121,29 @@ User.saveSettings = function () {
 }
 
 /**
+ * Shows the user change password form.
+ */
+User.showChangePassword = function () {
+    Application.get("/user/change-password", {}, function (data) {
+        Application.loadModal("user-password-change", data);
+    }, {self: false});
+}
+
+/**
+ * Saves the change password form.
+ */
+User.changePassword = function () {
+    const me = this;
+    Application.saveForm('#user-password-change-form', "/user/change-password", {}, {
+        self: false,
+        success: function (data) {
+            Application.showInfoAlert("Password", "The password has been changed successfully");
+            Application.closeModal();
+        }
+    });
+}
+
+/**
  * Initializes the user
  */
 User.initialize = function () {
@@ -132,7 +155,13 @@ User.initialize = function () {
  */
 User.start = function () {
     if (this.getData().resetPassword) {
-        Application.showWarnAlert("Security", "Your password was reset recently by the system administrator or yourself. Please change your password to a password known only to you, as soon as possible.");
+        const key = "user.password-reset-reminder." + this.getId();
+        const lastShown = LocalStorage.get(key);
+        const now = Date.now();
+        if (typeof lastShown !== "number" || !Number.isFinite(lastShown) || now - lastShown >= 4 * 60 * 60 * 1000) {
+            Application.showWarnAlert("Security", "Your password was reset recently by the system administrator or yourself. Please change your password to a password known only to you, as soon as possible. <br><br>Change password <a href='#' onclick='User.showChangePassword()'>now</a>?");
+            LocalStorage.set(key, now);
+        }
     }
 }
 

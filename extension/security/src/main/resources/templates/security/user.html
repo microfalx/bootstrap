@@ -2,6 +2,38 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
+<div id="user-password-change" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered" style="min-width: 400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3">Change Password</h1>
+            </div>
+            <div class="modal-body help">
+                <div class="container-fluid">
+                    <form id ="user-password-change-form" th:action="@{/user/change-password}" method="post">
+                        <div class="mb-1">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-control" name="currentPassword" required></input>
+                        </div>
+                        <div class="mb-q">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="newPassword" required></input>
+                        </div>
+                        <div class="mb-q">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" name="newPasswordConfirmation" required></input>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="User.changePassword()">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="user-profile" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-sm modal-dialog-centered" style="min-width: 400px">
         <div class="modal-content">

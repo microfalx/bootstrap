@@ -95,6 +95,7 @@ public class ApplicationDialect extends AbstractProcessorDialect {
                 userInfo.name = authentication.getName();
                 userInfo.roles.addAll(authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
+                userInfo.id = userInfo.userName.trim().toLowerCase();
             }
             if (principal instanceof ExtendedUserDetails userDetails) {
                 userInfo.email = userDetails.getEmail();
