@@ -252,12 +252,7 @@ public abstract class AbstractField<M> implements Field<M> {
      * @return the converted value
      */
     protected final <T> T from(Object value, Class<T> target) {
-        try {
-            return Converters.from(value, target);
-        } catch (Exception e) {
-            throw new InvalidDataTypeExpression("Data conversion failure for field '" + getName() + "' from object '"
-                    + value + "' to type '" + net.microfalx.lang.ClassUtils.getName(target) + "'", e);
-        }
+        return Types.from(value, target);
     }
 
     /**

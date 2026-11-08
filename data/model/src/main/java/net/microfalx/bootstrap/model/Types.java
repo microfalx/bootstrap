@@ -1,8 +1,5 @@
 package net.microfalx.bootstrap.model;
 
-import net.microfalx.bootstrap.core.utils.Json;
-
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +9,10 @@ import java.util.Set;
  * <p>
  * The string representation of a collection or map or a complex object is expected to be in JSON format. JSON content
  * can be provided as a String, Reader, File, InputStream or Resource.
+ *
+ * @deprecated Use {@link net.microfalx.lang.convert.Types} instead.
  */
+@Deprecated
 public class Types {
 
     private Types() {
@@ -27,7 +27,7 @@ public class Types {
      * @return the converted value
      */
     public static <T> T from(Object value, Class<T> target) {
-        return Converters.from(value, target);
+        return net.microfalx.lang.convert.Types.from(value, target);
     }
 
     /**
@@ -39,8 +39,7 @@ public class Types {
      * @return the converted value
      */
     public static String asString(Object value) {
-        if (value == null) return null;
-        return from(value, String.class);
+        return net.microfalx.lang.convert.Types.asString(value);
     }
 
     /**
@@ -50,11 +49,7 @@ public class Types {
      * @return the converted collection
      */
     public static Collection<?> asCollection(Object value) {
-        try {
-            return Json.asCollection(value);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to collection", e);
-        }
+        return net.microfalx.lang.convert.Types.asCollection(value);
     }
 
     /**
@@ -66,11 +61,7 @@ public class Types {
      * @return the converted collection
      */
     public static <T> Collection<T> asCollection(Object value, Class<T> elementType) {
-        try {
-            return Json.asCollection(value, elementType);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to collection of " + elementType.getName(), e);
-        }
+        return net.microfalx.lang.convert.Types.asCollection(value, elementType);
     }
 
     /**
@@ -80,11 +71,7 @@ public class Types {
      * @return the converted collection
      */
     public static Set<?> asSet(Object value) {
-        try {
-            return Json.asSet(value);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to collection", e);
-        }
+        return net.microfalx.lang.convert.Types.asSet(value);
     }
 
     /**
@@ -96,11 +83,7 @@ public class Types {
      * @return the converted collection
      */
     static <T> Set<T> asSet(Object value, Class<T> elementType) {
-        try {
-            return Json.asSet(value, elementType);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to collection of " + elementType.getName(), e);
-        }
+        return net.microfalx.lang.convert.Types.asSet(value, elementType);
     }
 
     /**
@@ -110,11 +93,7 @@ public class Types {
      * @return the converted collection
      */
     public static <T> Map<String, T> asMap(Object value) {
-        try {
-            return Json.asMap(value);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to collection", e);
-        }
+        return net.microfalx.lang.convert.Types.asMap(value);
     }
 
     /**
@@ -126,11 +105,7 @@ public class Types {
      * @return the converted collection
      */
     public static <T> T asObject(Object value, Class<T> elementType) {
-        try {
-            return Json.asObject(value, elementType);
-        } catch (IOException e) {
-            throw new ModelException("Failed to convert value to object of " + elementType.getName(), e);
-        }
+        return net.microfalx.lang.convert.Types.asObject(value, elementType);
     }
 
 }

@@ -20,7 +20,7 @@ public interface Field<M> extends Identifiable<String>, Nameable, Descriptable {
      * @return the converted value
      */
     static <T> T from(Object value, Class<T> target) {
-        return Converters.from(value, target);
+        return Types.from(value, target);
     }
 
     /**
