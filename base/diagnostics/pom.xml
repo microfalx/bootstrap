@@ -64,7 +64,7 @@
 
         <dependency>
             <groupId>net.microfalx.argus</groupId>
-            <artifactId>argus-inspector</artifactId>
+            <artifactId>argus-diagnostics</artifactId>
         </dependency>
 
         <!-- Testing -->
