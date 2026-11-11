@@ -5,12 +5,14 @@
         <item key="host" name="Hostname" separator="SMTP Gateway" default="localhost" description="The hostname of the SMTP gateway"/>
         <item key="port" name="Port" data-type="integer" minimum="25" maximum="65535" default="25" description="The port of the SMTP gateway"/>
         <item key="tls" name="TLS" data-type="boolean" default="false" description="Indicates whether the SMPT gateway communication will use TLS"/>
+        <item key="tlsTrust" name="TLS Trust" default="" description="A space separated list of hostnames or IP addresses which should be trusted when using SSL/TLS (Use * to trust all hosts as a last resort, always provide a list of hosts/IPs)"/>
+        <item key="tlsCheckServerIdentity" name="TLS Check Server Identity" data-type="boolean" default="true" description="Indicates whether the server identity should be checked when using SSL/TLS (use false for accepting or self-signed certificates with incorrect hostnames)"/>
         <item key="userName" name="User Name" description="The username used to access the SMTP gateway"/>
         <item key="password" name="Password" description="The password used to access the SMTP gateway"/>
 
         <item key="from" name="From" separator="Fields" default="admin@local" description="The 'from' field for all emails going out"/>
 
-        <item key="maximumRetryCount" separator="Options" name="Maximum Retry Count" data-type="integer" default="10" description="The 'from' field for all emails going out"/>
+        <item key="maximumRetryCount" separator="Options" name="Maximum Retry Count" data-type="integer" default="10" description="The maximum number of retry attempts in case of failures"/>
         <item key="retryInterval" name="Retry Interval" data-type="duration" default="60s" description="The interval between retries"/>
         <item key="retention" name="Retention" data-type="duration" default="7d" description="The retention of emails already sent out"/>
     </group>
