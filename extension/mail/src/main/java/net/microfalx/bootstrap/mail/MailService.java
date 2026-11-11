@@ -219,6 +219,18 @@ public class MailService implements InitializingBean {
         props.put("mail.smtp.starttls.enable", !configuration.isTls());
         LOGGER.info("SMTP settings: {}, port: {}, user: {}", configuration.getHost(), configuration.getPort(),
                 maskSecret(configuration.getUserName()));
+        if (isNotEmpty(configuration.getTlsTrust())) {
+            props.put("mail.smtp.ssl.trust", configuration.getTlsTrust());
+            if (configuration.getTlsTrust().contains("*")) {
+                LOGGER.warn("TLS trust is set to '*', which means all hosts will be trusted. This is not recommended for production environments.");
+            } else {
+                LOGGER.warn("TLS trust is set to '{}'", configuration.getTlsTrust());
+            }
+            props.put("mail.smtp.ssl.checkserveridentity", configuration.isTlsCheckServerIdentity());
+            if (!configuration.isTlsCheckServerIdentity()) {
+                LOGGER.warn("TLS check server identity is disabled. This may allow connections to servers with invalid certificates. This is not recommended for production environments.");
+            }
+        }
     }
 
     private static String getFirstAddress(MimeMessage mimeMessage) {

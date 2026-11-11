@@ -34,9 +34,14 @@ public interface MailConfiguration extends ConfigurationListenerAware {
 
     /**
      * Returns whether the SMTP gateway requires TLS.
+     * <p>
+     * This setting is mapped to the JavaMail property "mail.smtp.ssl.enable" and "mail.smtp.starttls.enable".
+     * If set to true, the connection will not be upgraded to TLS, otherwise the connection will be upgraded to TLS
+     * using the STARTTLS command.
      *
      * @return <code>true</code> true if TLS is required, <code>false</code>
      */
+    @DefaultValue("false")
     boolean isTls();
 
     /**
@@ -52,6 +57,32 @@ public interface MailConfiguration extends ConfigurationListenerAware {
      * @return the password, null/empty if authentication is not required
      */
     String getPassword();
+
+    /**
+     * Returns a space separated list of hostnames or IP addresses which should be trusted when using SSL/TLS.
+     * <p>
+     * This setting is mapped to the JavaMail property "mail.smtp.ssl.trust". If set to "*", all hosts will be trusted.
+     * If set to a list of hostnames or IP addresses, only those hosts will be trusted.
+     * <p>
+     * Setting the value to "*" trusts certificates for all SMTP hosts, which is not recommended for production environments.
+     * It is better to specify the exact hostnames or IP addresses of the SMTP servers that should be trusted.
+     *
+     * @return a space separated list of hostnames or IP addresses
+     */
+    String getTlsTrust();
+
+    /**
+     * Returns whether the server identity should be checked when using SSL/TLS.
+     * <p>
+     * This setting is mapped to the JavaMail property "mail.smtp.ssl.checkserveridentity".
+     * If set to true, the server's identity will be checked against the certificate presented during
+     * the SSL/TLS handshake. If set to false, the server's identity will not be checked, which may be
+     * useful for testing or when using self-signed certificates.
+     *
+     * @return {@code true} if the server identity should be checked, {@code false} otherwise
+     */
+    @DefaultValue("true")
+    boolean isTlsCheckServerIdentity();
 
     /**
      * Returns the email address to be used with emails send from the application.
