@@ -1,6 +1,6 @@
 package net.microfalx.bootstrap.cli.util;
 
-import net.microfalx.bootstrap.core.process.ProcessLauncher;
+import net.microfalx.jvm.process.ProcessLauncher;
 import net.microfalx.lang.JvmUtils;
 import org.junit.jupiter.api.Test;
 

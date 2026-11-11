@@ -1,13 +1,11 @@
 package net.microfalx.bootstrap.cli.util;
 
-import net.microfalx.bootstrap.core.process.ProcessLauncher;
+import net.microfalx.jvm.process.ProcessLauncher;
 import net.microfalx.lang.Nameable;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 
 /**
@@ -90,11 +88,7 @@ public abstract class Execution<T extends Tool<T>, E extends Execution<T, E>> im
      * @return a non-null string
      */
     public final String getLogs() {
-        try {
-            return doGetLauncher().getLogs().loadAsString();
-        } catch (IOException e) {
-            return "#ERROR: " + getRootCauseDescription(e);
-        }
+        return doGetLauncher().getLogsAsString();
     }
 
     /**
