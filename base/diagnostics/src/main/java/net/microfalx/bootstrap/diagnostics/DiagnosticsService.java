@@ -40,6 +40,7 @@ public class DiagnosticsService implements InitializingBean {
         initListeners();
         initSettings();
         initHealthContributors();
+        initDiagnostics();
         registerObjectSizes();
     }
 
@@ -71,6 +72,10 @@ public class DiagnosticsService implements InitializingBean {
         LOGGER.info("Registered diagnostics health contributor, total contributors: {}", HealthService.getInstance().getContributors().size());
     }
 
+    private void initDiagnostics() {
+        LOGGER.info("Dump diagnostics to {}", getDiagnosticsService().getResources());
+    }
+
     private void registerObjectSizes() {
         ObjectSizeEstimator sizeEstimator = ObjectSizeEstimator.get();
         sizeEstimator.registerShallowSizeOfSubclass(net.microfalx.resource.Resource.class, 40);
@@ -79,6 +84,10 @@ public class DiagnosticsService implements InitializingBean {
 
     private HealthService getHealthService() {
         return HealthService.getInstance();
+    }
+
+    private net.microfalx.argus.diagnostics.DiagnosticsService getDiagnosticsService() {
+        return net.microfalx.argus.diagnostics.DiagnosticsService.getInstance();
     }
 
     private class DisagnosticsHealthContributor implements HealthContributor {
