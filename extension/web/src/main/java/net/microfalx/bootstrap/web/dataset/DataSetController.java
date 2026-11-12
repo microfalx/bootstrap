@@ -795,8 +795,11 @@ public abstract class DataSetController<M, ID> extends NavigableController<M, ID
     private Menu getMenu(DataSet<M, Field<M>, ID> dataSet) {
         Menu menu = new Menu().setId("actions");
         net.microfalx.bootstrap.dataset.annotation.DataSet dataSetAnnotation = getDataSetAnnotation();
-        if (!isReadOnly()) {
+        boolean hasView = !isReadOnly() || dataSetAnnotation.canDownload();
+        if (hasView) {
             menu.add(new Item().setAction("dataset.view").setText("View").setIcon("fa-solid fa-eye").setDescription("Views the " + dataSet.getName()));
+        }
+        if (!isReadOnly()) {
             menu.add(new Item().setAction("dataset.edit").setText("Edit").setIcon("fa-solid fa-pen-to-square").setDescription("Edits the " + dataSet.getName()));
             if (dataSetAnnotation.canClone()) {
                 menu.add(new Item().setAction("dataset.clone").setText("Clone").setIcon("fa-solid fa-clone").setDescription("Clones the " + dataSet.getName()));
@@ -804,9 +807,9 @@ public abstract class DataSetController<M, ID> extends NavigableController<M, ID
             if (canDelete()) {
                 menu.add(new Item().setAction("dataset.delete").setText("Delete").setIcon("fa-solid fa-trash-can").setDescription("Deletes the " + dataSet.getName()));
             }
-            if (dataSetAnnotation.canDownload()) {
-                menu.add(new Item().setAction("dataset.download").setText("Download").setIcon("fa-solid fa-download").setDescription("Downloads the " + dataSet.getName()));
-            }
+        }
+        if (dataSetAnnotation.canDownload()) {
+            menu.add(new Item().setAction("dataset.download").setText("Download").setIcon("fa-solid fa-download").setDescription("Downloads the " + dataSet.getName()));
         }
         updateActions(menu);
         return menu;
