@@ -41,11 +41,6 @@ public class Diagnostics extends IdentityAware<String> {
     @Width("90px")
     private State state;
 
-    @Position(150)
-    @Description("The reason why the diagnostics was collected")
-    @Width("30%")
-    private String description;
-
     @Position(20)
     @Description("The size of the collected data")
     @Width("80px")
@@ -55,7 +50,7 @@ public class Diagnostics extends IdentityAware<String> {
     @Position(100)
     @Label("Started At")
     @Description("The time when the diagnostics collection started")
-    @Width("80px")
+    @Width("100px")
     @CreatedDate
     @CreatedAt
     @OrderBy(OrderBy.Direction.DESC)
@@ -68,6 +63,11 @@ public class Diagnostics extends IdentityAware<String> {
     @Width("80px")
     @Formattable(unit = Formattable.Unit.MILLI_SECOND, zeroValue = Formattable.NA)
     private long duration;
+
+    @Position(150)
+    @Description("The reason why the diagnostics was collected")
+    @Width("30%")
+    private String description;
 
     @Position(200)
     @Visible(value = false)
