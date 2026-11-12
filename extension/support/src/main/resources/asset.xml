@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<assets xmlns="https://net.microfalx/xsd/asset-1.0.xsd">
+
+    <!-- Custom Controllers  -->
+    <update-asset-bundle id="controller">
+        <asset path="diagnostics.js" type="script"/>
+    </update-asset-bundle>
+
+</assets>

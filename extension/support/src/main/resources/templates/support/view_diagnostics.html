@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
+            <div class="row">
+                <div class="col-md-8"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Started At: </span><span class="fst-italic" th:text="${#formats.format(model.startedAt)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">Type: </span><span class="fst-italic" th:text="${#formats.format(model.type)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">State: </span><span class="fst-italic" th:text="${#formats.format(model.state)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Duration: </span><span class="fst-italic" th:text="${#formats.formatDuration(model.duration)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">Size: </span><span class="fst-italic" th:text="${model.size >= 0 ? #formats.formatBytes(model.size) : 'N/A'}"></span></div>
+                <div class="col-md-8"><span class="fw-bold">Description: </span><span class="fst-italic" th:text="${model.description}"></span></div>
+            </div>
+        </div>
+        <div class="row mb-1 p-1 fs-6">
+            <div th:if="${model.failureMessage}">
+                <h5>Failure</h5>
+                <div class="dataset-text-mono alert alert-danger" th:text="${model.failureMessage}"></div>
+            </div>
+            <div th:if="${model.failureStackTrace}">
+                <h5>Stack Trace</h5>
+                <div class="dataset-text-mono alert alert-light" th:text="${model.failureStackTrace}"></div>
+            </div>
+            <div th:if="${html}">
+                <h5>Content</h5>
+                <iframe class="w-100 border rounded" style="height: 60vh" sandbox="allow-scripts"
+                        th:src="@{/support/diagnostics/{id}/content(id=${model.id})}"></iframe>
+            </div>
+            <div th:if="${content}">
+                <h5>Content <small class="text-body-secondary">(first lines, download for the full content)</small></h5>
+                <div class="dataset-text-mono alert alert-light" th:text="${content}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

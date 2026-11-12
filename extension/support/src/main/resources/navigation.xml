@@ -4,6 +4,7 @@
     <menu id="primary">
         <menu id="support" text="Support" position="2000" icon="fa-solid fa-life-ring">
             <item id="alert" text="Alerts" action="/support/alert" position="500" icon="fa-solid fa-bell"/>
+            <item id="diagnostics" text="Diagnostics" action="/support/diagnostics" position="510" roles="admin" icon="fa-solid fa-stethoscope"/>
             <item id="store" text="Stores" action="/support/store" position="520" roles="admin" icon="fa-solid fa-box"/>
             <menu id="metric" text="Metrics" position="550" roles="admin" icon="fa-solid fa-ruler-combined">
                 <item id="timer" text="Timers" action="/support/metric/timer" icon="fa-solid fa-stopwatch"/>
