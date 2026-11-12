@@ -28,12 +28,12 @@ public class Diagnostics extends IdentityAware<String> {
     @Position(3)
     @Name
     @Description("The name of the diagnostics")
-    @Width("25%")
+    @Width("20%")
     private String name;
 
     @Position(5)
     @Description("The type of the diagnostics")
-    @Width("120px")
+    @Width("140px")
     private Type type;
 
     @Position(7)
@@ -43,7 +43,7 @@ public class Diagnostics extends IdentityAware<String> {
 
     @Position(150)
     @Description("The reason why the diagnostics was collected")
-    @Width("25%")
+    @Width("30%")
     private String description;
 
     @Position(20)

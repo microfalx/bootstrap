@@ -264,7 +264,7 @@ DataSet.upload = function () {
  * Downloads a model.
  */
 DataSet.download = function () {
-    let uri = this.getUri({}, DataSet.getId() + "/download");
+    let uri = this.getUri(DataSet.getId() + "/download");
     $("#dataset-download").attr("src", uri);
 }
 
@@ -289,8 +289,8 @@ DataSet.export = function (format, mode, download) {
     return id;
 }
 
-DataSet.viewAs = function (format){
-  Application.get("export", {format: format, download:false}, function (data) {
+DataSet.viewAs = function (format) {
+    Application.get("export", {format: format, download: false}, function (data) {
         DataSet.loadModal(data);
     });
 }
@@ -563,7 +563,7 @@ DataSet.initTables = function () {
 DataSet.initUpload = function () {
     let dropZoneEl = $("div." + DATASET_DROP_ZONE_CLASS);
     if (dropZoneEl.length === 0) return;
-    let params=  {};
+    let params = {};
     Application.updateCsrf(params);
     let dropZone = new Dropzone("div." + DATASET_DROP_ZONE_CLASS, {
         //autoProcessQueue: false,

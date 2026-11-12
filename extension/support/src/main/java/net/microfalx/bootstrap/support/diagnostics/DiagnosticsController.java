@@ -22,9 +22,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.URI;
-
-import static net.microfalx.lang.StringUtils.isEmpty;
 
 @Slf4j
 @Controller
@@ -81,7 +78,12 @@ public class DiagnosticsController extends DataSetController<Diagnostics, String
             if (diagnostics.isHtml()) {
                 controllerModel.addAttribute("html", true);
             } else {
-                controllerModel.addAttribute("content", getHead(diagnostics));
+                String head = getHead(diagnostics);
+                if (isBinary(head) && diagnostics.hasSummary()) {
+                    controllerModel.addAttribute("summary", diagnostics.getSummary());
+                } else {
+                    controllerModel.addAttribute("content", head);
+                }
             }
         });
     }
@@ -142,11 +144,8 @@ public class DiagnosticsController extends DataSetController<Diagnostics, String
         }
     }
 
-    private static String getFileName(net.microfalx.argus.diagnostics.Diagnostics diagnostics) {
-        URI uri = diagnostics.getUri();
-        String path = uri != null ? uri.getPath() : null;
-        if (isEmpty(path)) return diagnostics.getId();
-        return path.substring(path.lastIndexOf('/') + 1);
+    private static boolean isBinary(String head) {
+        return net.microfalx.argus.diagnostics.Diagnostics.BINARY_CONTENT.equals(head);
     }
 
     private static String getLabel(Type type) {
