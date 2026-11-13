@@ -65,7 +65,7 @@
         <module>ai</module>
         <module>test</module>
         <module>serenity</module>
-        <module>demo</module>
+        <!--module>demo</module-->
         <module>deploy</module>
         <module>bom</module>
     </modules>
