@@ -88,7 +88,7 @@
         <div id="dataset-toolbar" class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
                 <div th:each="button : ${#component.getChildren(toolbar)}" th:remove="tag">
-                    <button th:if="${button.menu == null}" type="button" component:tooltip="${button}" th:attr="onclick=|Application.action('${button.action}')|"
+                    <button th:if="${button.menu == null}" type="button" component:tooltip="${button}" th:attr="onclick=|Application.action('${button.action}'${#component.getFunctionArguments(button)})|"
                             th:class="${#component.getCssClass(button,'btn btn-primary btn-color me-2 btn-sm')}">
                         <i th:class="${button.icon}"></i><span class="ms-2" th:text="${button.text}"></span>
                     </button>
