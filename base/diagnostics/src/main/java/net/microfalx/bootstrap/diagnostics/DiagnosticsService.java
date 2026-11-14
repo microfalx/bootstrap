@@ -185,7 +185,7 @@ public class DiagnosticsService implements InitializingBean {
     }
 
     private void initDiagnostics() {
-        LOGGER.info("Dump diagnostics to {}", getDiagnosticsService().getResources());
+        LOGGER.info("Dump diagnostics to {}", getDiagnosticsService().getResources().toURI());
     }
 
     private void registerObjectSizes() {
