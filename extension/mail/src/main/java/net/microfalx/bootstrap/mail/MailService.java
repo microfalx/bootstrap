@@ -62,6 +62,17 @@ public class MailService implements InitializingBean {
         return unmodifiableCollection(mails.values());
     }
 
+    /**
+     * Returns a mail sent or being sent by this service.
+     *
+     * @param id the identifier of the mail
+     * @return a non-null instance
+     */
+    public Optional<Mail> getMail(String id) {
+        requireNonNull(id);
+        return Optional.ofNullable(mails.get(id));
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         initThreadPool();

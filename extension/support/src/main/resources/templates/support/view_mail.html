@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
+            <div class="row">
+                <div class="col-md-8"><span class="fw-bold">Subject: </span><span class="fst-italic" th:text="${model.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Created At: </span><span class="fst-italic" th:text="${#formats.format(model.createdAt)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.from}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Status: </span><span class="fst-italic" th:text="${#formats.format(model.status)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-2"><span class="fw-bold">Attempts: </span><span class="fst-italic" th:text="${#formats.format(model.attemptCount)}"></span></div>
+                <div class="col-md-2"><span class="fw-bold">Retries: </span><span class="fst-italic" th:text="${#formats.format(model.retryCount)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Sent At: </span><span class="fst-italic" th:text="${#formats.format(model.sentAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Failed At: </span><span class="fst-italic" th:text="${#formats.format(model.failedAt)}"></span></div>
+            </div>
+        </div>
+        <div class="row mb-1 p-1 fs-6">
+            <div th:if="${model.failure}">
+                <h5>Failure</h5>
+                <div class="dataset-text-mono alert alert-danger" th:text="${model.failure}"></div>
+            </div>
+            <div th:if="${stackTrace}">
+                <h5>Stack Trace</h5>
+                <div class="dataset-text-mono alert alert-light small" th:text="${stackTrace}"></div>
+            </div>
+            <div th:if="${hasBody}">
+                <h5>Content</h5>
+                <!-- an empty sandbox disables scripts, forms and plugins for the mail body -->
+                <iframe class="w-100 border rounded bg-white" style="height: 60vh" sandbox=""
+                        th:src="@{/support/mail/{id}/content(id=${model.id})}"></iframe>
+            </div>
+            <div th:unless="${hasBody}">
+                <div class="alert alert-light">The content of this mail is not available</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

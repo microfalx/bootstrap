@@ -6,6 +6,7 @@
             <item id="alert" text="Alerts" action="/support/alert" position="500" icon="fa-solid fa-bell"/>
             <item id="diagnostics" text="Diagnostics" action="/support/diagnostics" position="510" roles="admin" icon="fa-solid fa-stethoscope"/>
             <item id="store" text="Stores" action="/support/store" position="520" roles="admin" icon="fa-solid fa-box"/>
+            <item id="mail" text="Mails" action="/support/mail" position="530" roles="admin" icon="fa-solid fa-envelope"/>
             <menu id="metric" text="Metrics" position="550" roles="admin" icon="fa-solid fa-ruler-combined">
                 <item id="timer" text="Timers" action="/support/metric/timer" icon="fa-solid fa-stopwatch"/>
                 <item id="summary" text="Summaries" action="/support/metric/summary" icon="fa-solid fa-stopwatch"/>
