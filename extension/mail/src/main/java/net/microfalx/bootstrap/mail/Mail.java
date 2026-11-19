@@ -140,7 +140,7 @@ public class Mail implements Identifiable<String>, Nameable {
         this.sentAt = LocalDateTime.now();
         this.throwable = null;
         this.mimeMessage = null;
-        LOGGER.info(Glyph.ENVELOPE + " mail sent to ''{}'' with subject ''{}''",
+        LOGGER.info("Mail sent to ''{}'' with subject ''{}''",
                 to, TextUtils.abbreviate(subject, 50));
     }
 
@@ -149,10 +149,10 @@ public class Mail implements Identifiable<String>, Nameable {
         this.failedAt = LocalDateTime.now();
         this.throwable = throwable;
         if (retryCount.get() == 0) {
-            LOGGER.info(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}",
+            LOGGER.info("Mail failed to send to ''{}'' with subject ''{}'', root cause: {}",
                     to, TextUtils.abbreviate(subject, 50), ExceptionUtils.getRootCauseDescription(throwable));
         } else if ((retryCount.get() % 5) == 0) {
-            LOGGER.error(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}, retry count: {}",
+            LOGGER.error("Mail failed to send to ''{}'' with subject ''{}'', root cause: {}, retry count: {}",
                     to, TextUtils.abbreviate(subject, 50), ExceptionUtils.getRootCauseDescription(throwable), retryCount.get());
         }
         this.retryCount.incrementAndGet();
