@@ -6,8 +6,10 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.argus.api.Failure;
 import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.metrics.Metrics;
@@ -170,6 +172,7 @@ public class MailService implements InitializingBean {
         MimeMessage mimeMessage = mail.getMimeMessage();
         String address = getFirstAddress(mimeMessage);
         try (Timer ignored = MAIL_SENDING.startTimer(address)) {
+            mail.attempt();
             mailSender.send(mimeMessage);
             mail.sent();
             Arrays.stream(mimeMessage.getAllRecipients()).forEach(a -> MAIL_SENT.count(getAddress(a)));
@@ -185,10 +188,17 @@ public class MailService implements InitializingBean {
             address = getFirstAddress(mimeMessage);
         }
         MAIL_FAILED.count(address);
+        Failure failure = Failure.of(e);
+        Issue.Severity severity = failure.getType().isTransient() ? Issue.Severity.MEDIUM : Issue.Severity.HIGH;
+        if (failure.getType().isSecurity()) {
+            severity = Issue.Severity.CRITICAL;
+        }
         Issue.create(Issue.Type.STABILITY, "Mail")
                 .withDescription(e, "Failed to send email to ''{0}''", address)
-                .withSeverity(Issue.Severity.HIGH).withAttributeCounter(address)
+                .withSeverity(severity).withAttributeCounter(address)
+                .withAttribute("Failure Type", EnumUtils.toLabel(failure.getType()))
                 .register();
+
     }
 
     private void initThreadPool() {

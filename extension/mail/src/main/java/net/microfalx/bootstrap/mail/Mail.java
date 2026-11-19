@@ -5,10 +5,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-import net.microfalx.lang.IdGenerator;
-import net.microfalx.lang.Identifiable;
-import net.microfalx.lang.Nameable;
-import net.microfalx.lang.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import net.microfalx.lang.*;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +16,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 /**
  * Holds information about the status of a mail sending operation.
  */
+@Slf4j
 @Getter
 @ToString
 public class Mail implements Identifiable<String>, Nameable {
@@ -28,7 +27,9 @@ public class Mail implements Identifiable<String>, Nameable {
     private String from = StringUtils.NA_STRING;
     volatile Status status = Status.PENDING;
     private final LocalDateTime createdAt = LocalDateTime.now();
+    private final AtomicInteger attemptCount = new AtomicInteger();
     @Getter(AccessLevel.NONE) final AtomicInteger retryCount = new AtomicInteger();
+    volatile LocalDateTime attemptedAt;
     volatile LocalDateTime sentAt;
     volatile LocalDateTime failedAt;
     volatile Throwable throwable;
@@ -61,11 +62,20 @@ public class Mail implements Identifiable<String>, Nameable {
         return retryCount.get();
     }
 
+    void attempt() {
+        attemptedAt = LocalDateTime.now();
+        attemptCount.incrementAndGet();
+        LOGGER.debug(Glyph.ENVELOPE_ARROW + " attempt to send mail to ''{}'' with subject ''{}''",
+                to, TextUtils.abbreviate(subject, 50));
+    }
+
     void sent() {
         this.status = Status.SENT;
         this.sentAt = LocalDateTime.now();
         this.throwable = null;
         this.mimeMessage = null;
+        LOGGER.info(Glyph.ENVELOPE + " mail sent to ''{}'' with subject ''{}''",
+                to, TextUtils.abbreviate(subject, 50));
     }
 
     void failed(Throwable throwable) {
@@ -73,6 +83,10 @@ public class Mail implements Identifiable<String>, Nameable {
         this.failedAt = LocalDateTime.now();
         this.throwable = throwable;
         this.retryCount.incrementAndGet();
+        if ((retryCount.get() % 5) == 0) {
+            LOGGER.error(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}",
+                    to, TextUtils.abbreviate(subject, 50), ExceptionUtils.getRootCauseDescription(throwable));
+        }
     }
 
     public enum Status {
