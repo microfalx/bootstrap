@@ -82,11 +82,14 @@ public class Mail implements Identifiable<String>, Nameable {
         this.status = Status.FAILED;
         this.failedAt = LocalDateTime.now();
         this.throwable = throwable;
-        this.retryCount.incrementAndGet();
-        if ((retryCount.get() % 5) == 0) {
-            LOGGER.error(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}",
+        if (retryCount.get() == 0) {
+            LOGGER.info(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}",
                     to, TextUtils.abbreviate(subject, 50), ExceptionUtils.getRootCauseDescription(throwable));
+        } else if ((retryCount.get() % 5) == 0) {
+            LOGGER.error(Glyph.TRIANGULAR_FLAG + " mail failed to send to ''{}'' with subject ''{}'', root cause: {}, retry count: {}",
+                    to, TextUtils.abbreviate(subject, 50), ExceptionUtils.getRootCauseDescription(throwable), retryCount.get());
         }
+        this.retryCount.incrementAndGet();
     }
 
     public enum Status {
