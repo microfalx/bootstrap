@@ -26,12 +26,12 @@ public class Mail extends NamedIdentityAware<String> {
 
     @Position(10)
     @Description("The recipient of the mail")
-    @Width("200px")
+    @Width("150px")
     private String to;
 
     @Position(11)
     @Description("The sender of the mail")
-    @Width("200px")
+    @Width("150px")
     private String from;
 
     @Position(15)
@@ -39,52 +39,54 @@ public class Mail extends NamedIdentityAware<String> {
     @Width("80px")
     private net.microfalx.bootstrap.mail.Mail.Status status;
 
-    @Position(20)
-    @Label(value = "Attempts", group = "Counts")
-    @Description("The number of attempts to send the mail")
-    @Width("70px")
-    private int attemptCount;
-
-    @Position(21)
-    @Label(value = "Retries", group = "Counts")
-    @Description("The number of retries after a failure")
-    @Width("70px")
-    private int retryCount;
-
     @Position(30)
-    @Label(value = "Attempted", group = "Timestamps")
-    @Description("The last time when an attempt to send the mail was made")
-    @Width("80px")
-    @Formattable(elapsed = true)
-    private LocalDateTime attemptedAt;
-
-    @Position(31)
-    @Label(value = "Sent", group = "Timestamps")
-    @Description("The time when the mail was sent")
-    @Width("80px")
-    @Formattable(elapsed = true)
-    private LocalDateTime sentAt;
-
-    @Position(32)
-    @Label(value = "Failed", group = "Timestamps")
-    @Description("The last time when the mail failed to be sent")
-    @Width("80px")
-    @Formattable(elapsed = true)
-    private LocalDateTime failedAt;
-
-    @Position(50)
-    @Description("The root cause of the last failure")
-    @Width("30%")
-    private String failure;
-
-    @Position(100)
-    @Description("The time when the mail was submitted")
+    @Label(value = "Created", group = "Timestamps")
     @Width("80px")
     @OrderBy(OrderBy.Direction.DESC)
     @CreatedDate
     @CreatedAt
     @Formattable(tooltip = Formatters.CreatedAtTooltip.class, elapsed = true)
+    @Description("The time when the mail was submitted")
     private LocalDateTime createdAt;
+
+    @Position(31)
+    @Label(value = "Attempted", group = "Timestamps")
+    @Width("80px")
+    @Formattable(elapsed = true)
+    @Description("The last time when an attempt to send the mail was made")
+    private LocalDateTime attemptedAt;
+
+    @Position(32)
+    @Label(value = "Sent", group = "Timestamps")
+    @Width("80px")
+    @Formattable(elapsed = true)
+    @Description("The time when the mail was sent")
+    private LocalDateTime sentAt;
+
+    @Position(33)
+    @Label(value = "Failed", group = "Timestamps")
+    @Width("80px")
+    @Formattable(elapsed = true)
+    @Description("The last time when the mail failed to be sent")
+    private LocalDateTime failedAt;
+
+    @Position(40)
+    @Label(value = "Attempts", group = "Counts")
+    @Width("70px")
+    @Description("The number of attempts to send the mail")
+    private int attemptCount;
+
+    @Position(41)
+    @Label(value = "Retries", group = "Counts")
+    @Width("70px")
+    @Description("The number of retries after a failure")
+    private int retryCount;
+
+    @Position(50)
+    @Width("30%")
+    @Visible(false)
+    @Description("The root cause of the last failure")
+    private String failure;
 
     public static Mail from(net.microfalx.bootstrap.mail.Mail mail) {
         if (mail == null) return null;

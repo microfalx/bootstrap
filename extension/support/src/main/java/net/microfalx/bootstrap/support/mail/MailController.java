@@ -1,13 +1,19 @@
 package net.microfalx.bootstrap.support.mail;
 
+import net.microfalx.argus.report.ReportService;
 import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.web.component.Button;
+import net.microfalx.bootstrap.web.component.Toolbar;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
+import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.StringUtils;
+import net.microfalx.resource.MemoryResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +23,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.net.InetAddress;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -57,6 +67,44 @@ public class MailController extends SystemDataSetController<Mail, String> {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
                 .header(CONTENT_SECURITY_POLICY_HEADER, CONTENT_SECURITY_POLICY)
                 .body(mail.getBody());
+    }
+
+    /**
+     * Sends a test email to the recipients configured in the (Argus) report settings.
+     *
+     * @return the outcome
+     */
+    @GetMapping("test")
+    @ResponseBody()
+    public final JsonResponse<?> test() {
+        String recipients = ReportService.getInstance().getSettings().getRecipients();
+        List<String> addresses = List.of(StringUtils.split(recipients, ","));
+        if (addresses.isEmpty()) {
+            return JsonResponse.fail("No report recipients are configured, a test email cannot be sent");
+        }
+        String hostName = getHostName();
+        String subject = "Test Email - " + hostName;
+        String body = "This is a test email sent from '" + hostName + "' at " + ZonedDateTime.now()
+                + ".\n\nIf you received this message, the mail configuration works.";
+        for (String address : addresses) {
+            mailService.send(address, subject, MemoryResource.create(body));
+        }
+        return JsonResponse.success("A test email was queued for " + String.join(", ", addresses));
+    }
+
+    @Override
+    protected void updateToolbar(Toolbar toolbar) {
+        super.updateToolbar(toolbar);
+        toolbar.add(new Button().setAction("mail.test").setText("Test").setIcon("fa-solid fa-paper-plane")
+                .setDescription("Sends a test email to the recipients configured for reports"));
+    }
+
+    private static String getHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception e) {
+            return "localhost";
+        }
     }
 
     @Override
