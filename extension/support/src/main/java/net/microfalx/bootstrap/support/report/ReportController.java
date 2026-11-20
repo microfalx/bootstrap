@@ -5,20 +5,24 @@ import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
+import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.web.component.Button;
+import net.microfalx.bootstrap.web.component.Item;
+import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.component.Toolbar;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
+import net.microfalx.bootstrap.web.util.JsonResponse;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.resource.Resource;
+import net.microfalx.threadpool.ThreadPool;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -30,6 +34,7 @@ import static net.microfalx.lang.StringUtils.isEmpty;
  * The bean has an explicit name because {@link net.microfalx.bootstrap.support.ReportController} (the controller
  * which renders the current report) has the same simple name.
  */
+@Slf4j
 @Controller(ReportController.BEAN_NAME)
 @RequestMapping(value = "/support/reports")
 @DataSet(model = Report.class, viewTemplate = "support/view_report", viewClasses = "modal-xl", canDownload = true)
@@ -46,12 +51,37 @@ public class ReportController extends SystemDataSetController<Report, String> {
     private static final String CONTENT_SECURITY_POLICY = "sandbox allow-scripts";
 
     private static final String GENERATE_ACTION = "report.generate";
+    private static final String SEND_ACTION = "report.send";
+    private static final String INTERVAL_PARAMETER = "interval";
 
     private final ReportService reportService;
+    private final ThreadPool threadPool;
 
-    public ReportController(DataSetService dataSetService, ReportService reportService) {
+    public ReportController(DataSetService dataSetService, ReportService reportService, ThreadPool threadPool) {
         super(dataSetService);
         this.reportService = reportService;
+        this.threadPool = threadPool;
+    }
+
+    /**
+     * Sends (in the background) a report covering the requested interval.
+     *
+     * @param intervalName the name of the interval ({@link Interval})
+     * @return the response
+     */
+    @PostMapping("send")
+    @ResponseBody()
+    public final JsonResponse<?> send(@RequestParam(INTERVAL_PARAMETER) String intervalName) {
+        Interval interval = EnumUtils.fromName(Interval.class, intervalName);
+        threadPool.execute(() -> {
+            try {
+                reportService.send(interval.duration);
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to send report for the {}", interval.label);
+            }
+        });
+        return JsonResponse.success("Sending report for the " + interval.label
+                + ", it will be available shortly");
     }
 
     /**
@@ -102,6 +132,18 @@ public class ReportController extends SystemDataSetController<Report, String> {
         super.updateToolbar(toolbar);
         toolbar.add(new Button().setAction(GENERATE_ACTION).setText("Generate").setIcon("fa-solid fa-file-waveform")
                 .setDescription("Generates a report with the current state of the application (opens in a new tab)"));
+        toolbar.add(new Button().setText("Send").setIcon("fa-solid fa-paper-plane")
+                .setDescription("Sends a report to the configured recipients").setMenu(createSendMenu()));
+    }
+
+    private Menu createSendMenu() {
+        Menu menu = new Menu().setId("send");
+        for (Interval interval : Interval.values()) {
+            menu.add(new Item().setAction(SEND_ACTION).setText(interval.text).setIcon("fa-solid fa-clock")
+                    .setDescription("Sends a report covering the " + interval.label)
+                    .addParameter(INTERVAL_PARAMETER, interval.name()));
+        }
+        return menu;
     }
 
     private ResponseEntity<String> render(String id,
@@ -114,5 +156,25 @@ public class ReportController extends SystemDataSetController<Report, String> {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
                 .header(CONTENT_SECURITY_POLICY_HEADER, CONTENT_SECURITY_POLICY)
                 .body(html);
+    }
+
+    /**
+     * The intervals available when a report is sent on request.
+     */
+    private enum Interval {
+
+        HOUR("Last Hour", "last hour", Duration.ofHours(1)),
+        DAY("Last Day", "last day", Duration.ofDays(1)),
+        WEEK("Last Week", "last week", Duration.ofDays(7));
+
+        private final String text;
+        private final String label;
+        private final Duration duration;
+
+        Interval(String text, String label, Duration duration) {
+            this.text = text;
+            this.label = label;
+            this.duration = duration;
+        }
     }
 }
