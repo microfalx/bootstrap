@@ -102,6 +102,38 @@ public class ReportService implements InitializingBean {
     }
 
     /**
+     * Returns all reports sent by the service (still available in the store).
+     *
+     * @return a non-null instance
+     */
+    public Collection<Report.Content> getContents() {
+        return getReportService().getContents();
+    }
+
+    /**
+     * Returns the content of a report sent by the service.
+     *
+     * @param id the identifier of the report content
+     * @return the content, empty if it does not exist (anymore)
+     */
+    public Optional<Report.Content> getContent(String id) {
+        requireNonNull(id);
+        return getReportService().getContent(id);
+    }
+
+    /**
+     * Returns the archive (the encrypted zip, or the full report if no password is configured) attached
+     * to a report sent by the service.
+     *
+     * @param id the identifier of the report content
+     * @return the archive, empty if the report or its archive does not exist (anymore)
+     */
+    public Optional<Resource> getArchive(String id) {
+        requireNonNull(id);
+        return getReportService().getArchive(id);
+    }
+
+    /**
      * Sends a report about the system, using the given duration as the report time interval.
      *
      * @param interval the reporting interval

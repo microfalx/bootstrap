@@ -7,6 +7,7 @@
             <item id="diagnostics" text="Diagnostics" action="/support/diagnostics" position="510" roles="admin" icon="fa-solid fa-stethoscope"/>
             <item id="store" text="Stores" action="/support/store" position="520" roles="admin" icon="fa-solid fa-box"/>
             <item id="mail" text="Mails" action="/support/mail" position="530" roles="admin" icon="fa-solid fa-envelope"/>
+            <item id="report" text="Reports" action="/support/reports" position="540" roles="admin" icon="fa-solid fa-circle-info"/>
             <menu id="metric" text="Metrics" position="550" roles="admin" icon="fa-solid fa-ruler-combined">
                 <item id="timer" text="Timers" action="/support/metric/timer" icon="fa-solid fa-stopwatch"/>
                 <item id="summary" text="Summaries" action="/support/metric/summary" icon="fa-solid fa-stopwatch"/>
@@ -26,7 +27,6 @@
                 <item id="status" text="Status" action="/support/search/status" icon="fa-solid fa-temperature-quarter"/>
             </menu>
             <item id="library" text="Libraries" action="/support/library" roles="admin" position="10000" icon="fa-solid fa-solid fa-jar"/>
-            <item id="report" text="Report" action="/support/report" roles="admin" position="10000" icon="fa-solid fa-circle-info"/>
         </menu>
     </menu>
 

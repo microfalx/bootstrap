@@ -4,6 +4,7 @@
     <!-- Custom Controllers  -->
     <update-asset-bundle id="controller">
         <asset path="diagnostics.js" type="script"/>
+        <asset path="report.js" type="script"/>
         <asset path="alert.js" type="script"/>
         <asset path="mail.js" type="script"/>
     </update-asset-bundle>

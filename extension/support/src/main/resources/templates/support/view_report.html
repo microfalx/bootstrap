@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
+            <div class="row">
+                <div class="col-md-8"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Sent At: </span><span class="fst-italic" th:text="${#formats.format(model.createdAt)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">Summary Size: </span><span class="fst-italic" th:text="${#formats.formatBytes(model.summarySize)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Report Size: </span><span class="fst-italic" th:text="${#formats.formatBytes(model.contentSize)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Archive: </span><span class="fst-italic" th:text="${model.archive ? 'Available (download for the encrypted report)' : 'Not available'}"></span></div>
+            </div>
+        </div>
+        <div class="row mb-1 p-1 fs-6">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#report-summary" type="button" role="tab">Summary</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#report-content" type="button" role="tab">Full Report</button>
+                </li>
+            </ul>
+            <div class="tab-content p-0">
+                <!-- reports need scripts (navigation), but they run in a unique origin, isolated from the application -->
+                <div class="tab-pane fade show active" id="report-summary" role="tabpanel">
+                    <iframe th:if="${hasSummary}" class="w-100 border border-top-0 rounded-bottom bg-white" style="height: 65vh"
+                            sandbox="allow-scripts" th:src="@{/support/reports/{id}/summary(id=${model.id})}"></iframe>
+                    <div th:unless="${hasSummary}" class="alert alert-light mt-1">The summary of this report is not available</div>
+                </div>
+                <div class="tab-pane fade" id="report-content" role="tabpanel">
+                    <iframe th:if="${hasContent}" class="w-100 border border-top-0 rounded-bottom bg-white" style="height: 65vh"
+                            sandbox="allow-scripts" loading="lazy" th:src="@{/support/reports/{id}/content(id=${model.id})}"></iframe>
+                    <div th:unless="${hasContent}" class="alert alert-light mt-1">The full report is not available</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
